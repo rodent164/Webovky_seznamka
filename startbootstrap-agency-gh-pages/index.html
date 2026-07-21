@@ -373,47 +373,6 @@
                                         Ženy: <span id="womenCount">0</span>
                                     </div>
                                     
-
-
-
-                                    <script>
-                                    fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vTSBaJVngtTeBAUL8_Ns0TMnYzjA86ul0pHn95VGIi77vp8sKdPkQxNEJkT12uua9lYU5gzLovvHJEh/pub?gid=859303276&single=true&output=csv")
-                                        .then(response => response.text())
-                                        .then(data => {
-
-                                            const rows = data.trim().split("\n");
-
-                                            // první řádek = názvy sloupců
-                                            const headers = rows[0].split(",");
-
-                                            // najdeme sloupec Pohlaví
-                                            const genderIndex = headers.indexOf("Pohlaví");
-
-                                            let men = 0;
-                                            let women = 0;
-
-                                            // projdeme všechny odpovědi
-                                            rows.slice(1).forEach(row => {
-                                                const values = row.split(",");
-                                                const gender = values[genderIndex]?.trim();
-
-                                                if (gender === "Muž") {
-                                                    men++;
-                                                }
-
-                                                if (gender === "Žena") {
-                                                    women++;
-                                                }
-                                            });
-
-                                            document.getElementById("menCount").textContent = men;
-                                            document.getElementById("womenCount").textContent = women;
-
-                                        })
-                                        .catch(error => console.error(error));
-                                    </script>
-
-
                                     <a class="btn btn-primary btn-xl text-uppercase"
                                         href="https://forms.gle/tejDEBpstBJ3NeeD9"
                                         target="_blank">
