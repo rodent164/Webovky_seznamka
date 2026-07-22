@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="cs">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="Registrace na seznamovací akci v Plzni" />
+        <title>Registrace | Seznamovací akce Plzeň</title>
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
+        <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" type="text/css" />
+        <link href="css/styles.css" rel="stylesheet" />
+    </head>
+    <body class="registration-page">
+        <main class="registration-main">
+            <a class="registration-back" href="index.html">&larr; Zpět na hlavní stránku</a>
+            <section class="registration-card" aria-labelledby="registration-title">
+                <div class="text-center">
+                    <h1 id="registration-title" class="section-heading text-uppercase">Registrace</h1>
+                    <p class="registration-intro">Vyplňte své údaje a rezervujte si místo na naší akci.</p>
+                </div>
+
+                <form id="registrationForm" novalidate>
+                    <div class="mb-4">
+                        <label class="form-label" for="name">Jméno</label>
+                        <input class="form-control" id="name" name="name" type="text" autocomplete="given-name" pattern="[A-Za-z]+(?:[ -][A-Za-z]+)*" required aria-describedby="nameHelp" />
+                        <div id="nameHelp" class="form-text">Pouze písmena A–Z, případně mezera nebo pomlčka.</div>
+                        <div class="invalid-feedback">Zadejte prosím jméno pouze s písmeny A–Z.</div>
+                    </div>
+
+                    <fieldset class="mb-4">
+                        <legend class="form-label">Pohlaví</legend>
+                        <div class="d-flex gap-4">
+                            <div class="form-check">
+                                <input class="form-check-input" id="male" name="gender" type="radio" value="Muž" required />
+                                <label class="form-check-label" for="male">Muž</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" id="female" name="gender" type="radio" value="Žena" required />
+                                <label class="form-check-label" for="female">Žena</label>
+                            </div>
+                        </div>
+                        <div class="invalid-feedback d-block gender-error">Vyberte prosím pohlaví.</div>
+                    </fieldset>
+
+                    <div class="mb-4">
+                        <label class="form-label" for="age">Věk</label>
+                        <input class="form-control" id="age" name="age" type="number" min="18" max="99" inputmode="numeric" required />
+                        <div class="invalid-feedback">Zadejte věk v rozmezí 18 až 99 let.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" for="email">E-mail</label>
+                        <input class="form-control" id="email" name="email" type="email" autocomplete="email" required />
+                        <div class="invalid-feedback">Zadejte platnou e-mailovou adresu.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" for="phone">Telefon</label>
+                        <input class="form-control" id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+420 123 456 789" required aria-describedby="phoneHelp" />
+                        <div id="phoneHelp" class="form-text">Zadejte české číslo, například +420 123 456 789 nebo 123 456 789.</div>
+                        <div class="invalid-feedback">Zadejte platné české telefonní číslo.</div>
+                    </div>
+
+                    <button class="btn btn-primary btn-xl text-uppercase w-100" type="submit">Odeslat registraci</button>
+                    <p id="formSuccess" class="registration-success" role="status" hidden>Děkujeme! Vaše registrace byla přijata.</p>
+                </form>
+            </section>
+        </main>
+        <script src="js/registration.js"></script>
+    </body>
+</html>
