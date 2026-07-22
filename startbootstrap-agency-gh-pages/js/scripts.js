@@ -83,6 +83,8 @@ function loadGenderCount() {
 
             const genderIndex = headers.indexOf("Pohlaví");
 
+            const ageIndex = headers.indexOf("Věk");
+
             let men = 0;
             let women = 0;
 
@@ -93,8 +95,10 @@ function loadGenderCount() {
 
                 const gender = values[genderIndex]?.trim();
 
+                const age = values[ageIndex]?.trim();
+                 console.log(gender, age); //Tohle nic neukazuje!!!
 
-                if (gender === "Muž") {
+                if (gender === "Muž" && age === "25-35") {
                     men++;
                 }
 
