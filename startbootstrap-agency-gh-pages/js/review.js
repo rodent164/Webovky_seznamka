@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const savedRegistration = sessionStorage.getItem('registrationDetails');
+    let details;
 
     if (!savedRegistration) {
         window.location.replace('rezervace.html');
@@ -7,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-        const details = JSON.parse(savedRegistration);
+        details = JSON.parse(savedRegistration);
         const fields = {
             reviewName: details.name,
             reviewGender: details.gender,
@@ -25,13 +26,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    document.querySelector('#confirmRegistration').addEventListener('click', () => {
-        sessionStorage.removeItem('registrationDetails');
-        document.querySelector('#reviewContent').innerHTML = `
-            <div class="text-center registration-confirmation" role="status">
-                <h1 class="section-heading text-uppercase">Děkujeme!</h1>
-                <p class="registration-intro">Vaše registrace byla potvrzena.</p>
-                <a class="btn btn-primary btn-xl text-uppercase" href="index.html">Zpět na hlavní stránku</a>
-            </div>`;
+    document.querySelector('#confirmRegistration').addEventListener('click', async (event) => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        button.textContent = 'Přesměrování na platbu…';
+
+        try {
+            const response = await fetch('/api/create-checkout-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: details.email })
+            });
+            const result = await response.json();
+
+            if (!response.ok || !result.url) {
+                throw new Error(result.error || 'Unable to create Checkout Session.');
+            }
+
+            window.location.assign(result.url);
+        } catch (error) {
+            button.disabled = false;
+            button.textContent = 'Zaplatit a potvrdit registraci';
+            alert('Platbu se nepodařilo zahájit. Zkuste to prosím znovu.');
+        }
     });
 });
