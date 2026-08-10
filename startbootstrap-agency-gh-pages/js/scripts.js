@@ -1,11 +1,11 @@
-/*!
-* Start Bootstrap - Agency v7.0.12 (https://startbootstrap.com/theme/agency)
-* Copyright 2013-2023 Start Bootstrap
-* Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-agency/blob/master/LICENSE)
-*/
-//
-// Scripts
-// 
+const SUPABASE_URL = "https://fhsptjjfxseijrironas.supabase.co";
+
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoc3B0ampmeHNlaWpyaXJvbmFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3MTg0NDQsImV4cCI6MjEwMTI5NDQ0NH0.jvEjiZQdsbVXvKT02D5ADISKli28VCmaVMpbM3h88yw";
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
 
 // Navbar shrink function
 window.addEventListener('DOMContentLoaded', event => {
@@ -66,65 +66,43 @@ window.addEventListener('DOMContentLoaded', event => {
 });
 
 
-// Count men and women from Google Sheets
-function loadGenderCount() {
+// Count men and women from Supabase
+async function loadGenderCount() {
 
-    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTSBaJVngtTeBAUL8_Ns0TMnYzjA86ul0pHn95VGIi77vp8sKdPkQxNEJkT12uua9lYU5gzLovvHJEh/pub?gid=859303276&single=true&output=csv";
+    const { data, error } = await supabaseClient
+        .from('registrations')
+        .select('gender, user_id');
 
+    console.log("REGISTRATIONS DATA:", data);
+    console.log("REGISTRATIONS ERROR:", error);
 
-    fetch(sheetUrl)
-        .then(response => response.text())
-        .then(data => {
+    if (error) {
+        console.error("Supabase error:", error);
+        return;
+    }
 
-            const rows = data.trim().split("\n");
+    let men = 0;
+    let women = 0;
 
-            // First row contains column names
-            const headers = rows[0].split(",");
+    for (const registration of data) {
 
-            const genderIndex = headers.indexOf("Pohlaví");
+        if (registration.gender === "Muž") {
+            men++;
+        }
 
-            const ageIndex = headers.indexOf("Věk");
+        if (registration.gender === "Žena") {
+            women++;
+        }
+    }
 
-            let men = 0;
-            let women = 0;
+    const menElement = document.getElementById("menCount");
+    const womenElement = document.getElementById("womenCount");
 
+    if (menElement) {
+        menElement.textContent = men;
+    }
 
-            rows.slice(1).forEach(row => {
-
-                const values = row.split(",");
-
-                const gender = values[genderIndex]?.trim();
-
-                const age = values[ageIndex]?.trim();
-                 console.log(gender, age); //Tohle nic neukazuje!!!
-
-                if (gender === "Muž" && age === "25-35") {
-                    men++;
-                }
-
-                if (gender === "Žena") {
-                    women++;
-                }
-
-            });
-
-
-            // Update HTML only if elements exist
-            const menElement = document.getElementById("menCount");
-            const womenElement = document.getElementById("womenCount");
-
-
-            if (menElement) {
-                menElement.textContent = men;
-            }
-
-            if (womenElement) {
-                womenElement.textContent = women;
-            }
-
-        })
-        .catch(error => {
-            console.error("Google Sheets error:", error);
-        });
-
+    if (womenElement) {
+        womenElement.textContent = women;
+    }
 }
