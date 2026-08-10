@@ -12,10 +12,19 @@ supabaseClient.rpc('test_auth_role').then(({ data, error }) => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    const eventId = new URLSearchParams(window.location.search).get('event_id');
+
+    const eventIdInput = document.querySelector('#event_id');
+
+    if (eventIdInput) {
+        eventIdInput.value = eventId;
+    }
 
     const form = document.querySelector('#registrationForm');
     const phone = document.querySelector('#phone');
     const genderError = document.querySelector('.gender-error');
+
+    console.log("EVENT ID FROM URL:", eventId);
 
 
     const isCzechPhone = (value) => {

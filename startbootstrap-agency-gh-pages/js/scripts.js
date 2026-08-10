@@ -1,11 +1,13 @@
 const SUPABASE_URL = "https://fhsptjjfxseijrironas.supabase.co";
-
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoc3B0ampmeHNlaWpyaXJvbmFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3MTg0NDQsImV4cCI6MjEwMTI5NDQ0NH0.jvEjiZQdsbVXvKT02D5ADISKli28VCmaVMpbM3h88yw";
+
+
 
 const supabaseClient = supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
 );
+
 
 // Navbar shrink function
 window.addEventListener('DOMContentLoaded', event => {
@@ -59,6 +61,30 @@ window.addEventListener('DOMContentLoaded', event => {
         });
     });
 
+    const link = document.querySelector('#portfolioModal1 .registration-link');
+
+if (link) {
+    link.addEventListener('click', async (event) => {
+
+        event.preventDefault();
+
+        const eventName = link.dataset.eventName;
+
+        const { data, error } = await supabaseClient
+            .from('events')
+            .select('id')
+            .eq('name', eventName)
+            .single();
+
+        if (error) {
+            console.error("Event error:", error);
+            alert("Nepodařilo se načíst informace o akci.");
+            return;
+        }
+
+        window.location.href = `rezervace.html?event_id=${data.id}`;
+    });
+}
 
     // Load event registrations
     loadGenderCount();
@@ -69,10 +95,14 @@ window.addEventListener('DOMContentLoaded', event => {
 // Count men and women from Supabase
 async function loadGenderCount() {
 
-    const { data, error } = await supabaseClient
-        .from('registrations')
-        .select('gender, user_id');
+const eventId = new URLSearchParams(window.location.search).get('event_id');
 
+const { data, error } = await supabaseClient 
+    .from('registrations')
+    .select('gender, user_id')
+    .eq('event_id', eventId);
+
+    console.log("EVENT ID:", eventId);
     console.log("REGISTRATIONS DATA:", data);
     console.log("REGISTRATIONS ERROR:", error);
 
