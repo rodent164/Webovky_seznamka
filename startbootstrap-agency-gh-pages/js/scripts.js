@@ -87,52 +87,67 @@ if (link) {
 }
 
     // Load event registrations
-    loadGenderCount();
+    loadGenderCounts();
 
 });
 
 
 // Count men and women from Supabase
-async function loadGenderCount() {
+async function loadGenderCounts() {
 
-const eventId = new URLSearchParams(window.location.search).get('event_id');
+    const modals = document.querySelectorAll('.portfolio-modal[data-event-name]');
 
-const { data, error } = await supabaseClient 
-    .from('registrations')
-    .select('gender, user_id')
-    .eq('event_id', eventId);
+    for (const modal of modals) {
 
-    console.log("EVENT ID:", eventId);
-    console.log("REGISTRATIONS DATA:", data);
-    console.log("REGISTRATIONS ERROR:", error);
+        const eventName = modal.dataset.eventName;
 
-    if (error) {
-        console.error("Supabase error:", error);
-        return;
-    }
+        // Najdeme ID akce podle názvu
+        const { data: event, error: eventError } = await supabaseClient
+            .from('events')
+            .select('id')
+            .eq('name', eventName)
+            .single();
 
-    let men = 0;
-    let women = 0;
-
-    for (const registration of data) {
-
-        if (registration.gender === "Muž") {
-            men++;
+        if (eventError) {
+            console.error(`Event "${eventName}" error:`, eventError);
+            continue;
         }
 
-        if (registration.gender === "Žena") {
-            women++;
+        // Načteme registrace této konkrétní akce
+        const { data: registrations, error: registrationError } = await supabaseClient
+            .from('registrations')
+            .select('gender')
+            .eq('event_id', event.id);
+
+        if (registrationError) {
+            console.error(`Registrations for "${eventName}" error:`, registrationError);
+            continue;
         }
-    }
 
-    const menElement = document.getElementById("menCount");
-    const womenElement = document.getElementById("womenCount");
+        let men = 0;
+        let women = 0;
 
-    if (menElement) {
-        menElement.textContent = men;
-    }
+        for (const registration of registrations) {
 
-    if (womenElement) {
-        womenElement.textContent = women;
+            if (registration.gender === "Muž") {
+                men++;
+            }
+
+            if (registration.gender === "Žena") {
+                women++;
+            }
+        }
+
+        // Najdeme počítadla pouze uvnitř tohoto modalu
+        const menElement = modal.querySelector('.men-count');
+        const womenElement = modal.querySelector('.women-count');
+
+        if (menElement) {
+            menElement.textContent = men;
+        }
+
+        if (womenElement) {
+            womenElement.textContent = women;
+        }
     }
 }
