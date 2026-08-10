@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const { data: eventData, error: eventError } = await supabaseClient
     .from('events')
-    .select('age_min, age_max')
+    .select('age_min, age_max, capacity_m, capacity_f')
     .eq('id', eventId)
     .single();
 
@@ -115,7 +115,30 @@ if (
 
     return;
 }
+const { count, error: countError } = await supabaseClient
+    .from('registrations')
+    .select('*', { count: 'exact', head: true })
+    .eq('event_id', registrationData.event_id)
+    .eq('gender', registrationData.gender);
 
+if (countError) {
+    console.error("COUNT ERROR:", countError);
+
+    alert("Nepodařilo se ověřit kapacitu akce.");
+    return;
+}
+
+const capacity = registrationData.gender === "Muž"
+    ? eventData.capacity_m
+    : eventData.capacity_f;
+
+if (count >= capacity) {
+    alert(
+        `Kapacita pro pohlaví ${registrationData.gender.toLowerCase()} na této akci je již naplněná. Změňte si pohlaví nebo se přihlaště ne jinou akci.`
+    );
+
+    return;
+}
 
 // 1) vytvoření uživatele
 const { data: user, error: userError } = await supabaseClient
