@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/create-checkout-session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: details.email })
+                body: JSON.stringify(details)
             });
             const result = await response.json();
 

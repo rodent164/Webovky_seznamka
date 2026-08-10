@@ -1,3 +1,5 @@
+<!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> -->
+<!-- <script src="js/registration_new.js"></script> -->
 <!DOCTYPE html>
 <html lang="cs">
     <head>
@@ -20,51 +22,141 @@
                 </div>
 
                 <form id="registrationForm" novalidate>
-                    <div class="mb-4">
-                        <label class="form-label" for="name">Jméno</label>
-                        <input class="form-control" id="name" name="name" type="text" autocomplete="given-name" pattern="[A-Za-z]+(?:[ -][A-Za-z]+)*" required aria-describedby="nameHelp" />
-                        <div id="nameHelp" class="form-text">Pouze písmena A–Z, případně mezera nebo pomlčka.</div>
-                        <div class="invalid-feedback">Zadejte prosím jméno pouze s písmeny A–Z.</div>
-                    </div>
 
-                    <fieldset class="mb-4">
-                        <legend class="form-label">Pohlaví</legend>
-                        <div class="d-flex gap-4">
-                            <div class="form-check">
-                                <input class="form-check-input" id="male" name="gender" type="radio" value="Muž" required />
-                                <label class="form-check-label" for="male">Muž</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" id="female" name="gender" type="radio" value="Žena" required />
-                                <label class="form-check-label" for="female">Žena</label>
-                            </div>
-                        </div>
-                        <div class="invalid-feedback d-block gender-error">Vyberte prosím pohlaví.</div>
-                    </fieldset>
+    <input type="hidden" id="event_id" name="event_id" value="5029677e-feb9-478d-b0a7-412b292ce2e3">
 
-                    <div class="mb-4">
-                        <label class="form-label" for="age">Věk</label>
-                        <input class="form-control" id="age" name="age" type="number" min="18" max="99" inputmode="numeric" required />
-                        <div class="invalid-feedback">Zadejte věk v rozmezí 18 až 99 let.</div>
-                    </div>
+    <div class="mb-4">
+        <label class="form-label" for="nickname">Přezdívka</label>
+        <input 
+            class="form-control" 
+            id="nickname" 
+            name="nickname" 
+            type="text" 
+            maxlength="50"
+            required 
+            aria-describedby="nicknameHelp" 
+        />
+        <div id="nicknameHelp" class="form-text">
+            Přezdívka bude použita při organizaci akce.
+        </div>
+        <div class="invalid-feedback">
+            Zadejte prosím přezdívku.
+        </div>
+    </div>
 
-                    <div class="mb-4">
-                        <label class="form-label" for="email">E-mail</label>
-                        <input class="form-control" id="email" name="email" type="email" autocomplete="email" required />
-                        <div class="invalid-feedback">Zadejte platnou e-mailovou adresu.</div>
-                    </div>
+    <fieldset class="mb-4">
+        <legend class="form-label">Pohlaví</legend>
 
-                    <div class="mb-4">
-                        <label class="form-label" for="phone">Telefon</label>
-                        <input class="form-control" id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+420 123 456 789" required aria-describedby="phoneHelp" />
-                        <div id="phoneHelp" class="form-text">Zadejte české číslo, například +420 123 456 789 nebo 123 456 789.</div>
-                        <div class="invalid-feedback">Zadejte platné české telefonní číslo.</div>
-                    </div>
+        <div class="d-flex gap-4">
+            <div class="form-check">
+                <input 
+                    class="form-check-input" 
+                    id="male" 
+                    name="gender" 
+                    type="radio" 
+                    value="Muž" 
+                    required 
+                />
+                <label class="form-check-label" for="male">
+                    Muž
+                </label>
+            </div>
 
-                    <button class="btn btn-primary btn-xl text-uppercase w-100" type="submit">Zkontrolovat údaje</button>
-                </form>
+            <div class="form-check">
+                <input 
+                    class="form-check-input" 
+                    id="female" 
+                    name="gender" 
+                    type="radio" 
+                    value="Žena" 
+                    required 
+                />
+                <label class="form-check-label" for="female">
+                    Žena
+                </label>
+            </div>
+        </div>
+
+        <div class="invalid-feedback d-block gender-error">
+            Vyberte prosím pohlaví.
+        </div>
+    </fieldset>
+
+    <div class="mb-4">
+        <label class="form-label" for="age">Věk</label>
+        <input 
+            class="form-control" 
+            id="age" 
+            name="age" 
+            type="number" 
+            min="18" 
+            max="99" 
+            inputmode="numeric" 
+            required 
+        />
+        <div class="invalid-feedback">
+            Zadejte věk v rozmezí 18 až 99 let.
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label" for="email">E-mail</label>
+        <input 
+            class="form-control" 
+            id="email" 
+            name="email" 
+            type="email" 
+            autocomplete="email" 
+            required 
+        />
+        <div class="invalid-feedback">
+            Zadejte platnou e-mailovou adresu.
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label" for="phone">Telefon (nepovinné)</label>
+        <input 
+            class="form-control" 
+            id="phone" 
+            name="phone" 
+            type="tel" 
+            autocomplete="tel" 
+            placeholder="+420 123 456 789"
+        />
+        <div id="phoneHelp" class="form-text">
+            Telefon použijeme pouze v případě nutnosti kontaktovat vás ohledně akce.
+        </div>
+        <div class="invalid-feedback">
+            Zadejte platné české telefonní číslo.
+        </div>
+    </div>
+
+    <div class="form-check mb-4">
+        <input 
+            class="form-check-input" 
+            id="privacy" 
+            name="privacy" 
+            type="checkbox" 
+            required
+        />
+        <label class="form-check-label" for="privacy">
+            Souhlasím se zpracováním osobních údajů pro účely organizace akce.
+        </label>
+
+        <div class="invalid-feedback">
+            Pro pokračování je nutný souhlas.
+        </div>
+    </div>
+
+    <button class="btn btn-primary btn-xl text-uppercase w-100" type="submit">
+        Zkontrolovat údaje
+    </button>
+
+</form>
             </section>
         </main>
-        <script src="js/registration.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="js/registration_new.js"></script> <!-- "js/registration.js">-->
     </body>
 </html>

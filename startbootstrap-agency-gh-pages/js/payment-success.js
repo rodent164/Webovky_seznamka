@@ -9,20 +9,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    try {
-        const response = await fetch(`/api/checkout-session/${encodeURIComponent(sessionId)}`);
-        const result = await response.json();
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+        try {
+            const response = await fetch(`/api/checkout-session/${encodeURIComponent(sessionId)}`);
+            const result = await response.json();
 
-        if (!response.ok || !result.paid) {
-            throw new Error(result.error || 'Payment has not completed.');
+            if (response.ok && result.paid) {
+                sessionStorage.removeItem('registrationDetails');
+                document.querySelector('.section-heading').textContent = 'Děkujeme!';
+                status.textContent = 'Vaše platba i registrace byly potvrzeny.';
+                homeLink.classList.remove('d-none');
+                return;
+            }
+        } catch (error) {
+            // The webhook may still be on its way. Keep trying for a short period.
         }
 
-        sessionStorage.removeItem('registrationDetails');
-        document.querySelector('.section-heading').textContent = 'Děkujeme!';
-        status.textContent = 'Vaše platba i registrace byly potvrzeny.';
-    } catch (error) {
-        status.textContent = 'Platbu se nepodařilo ověřit. Pokud vám byla částka stržena, kontaktujte prosím pořadatele.';
+        await new Promise((resolve) => window.setTimeout(resolve, 1000));
     }
 
+    status.textContent = 'Platba se stále ověřuje. Pokud vám byla částka stržena, kontaktujte prosím pořadatele.';
     homeLink.classList.remove('d-none');
 });

@@ -2,6 +2,8 @@
 
 This site uses a server-created Stripe Checkout Session for one paid event ticket. The price is set on the server, never in browser code.
 
+Paid registrations are stored in a local SQLite database at `data/registrations.db`. It is excluded from Git because it contains personal information. A record starts as `pending` and normally changes to `paid` when Stripe's verified webhook confirms the payment. The success page also verifies its specific Checkout Session directly with Stripe if a local development webhook was missed.
+
 ## First-time setup
 
 1. Install Node.js 20 or later, then run `npm install` in this directory.

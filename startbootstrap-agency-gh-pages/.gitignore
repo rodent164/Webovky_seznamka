@@ -3,3 +3,7 @@
 .env.*
 !.env.example
 node_modules/
+
+# Local registration data (contains personal information)
+data/
+Arsha*
