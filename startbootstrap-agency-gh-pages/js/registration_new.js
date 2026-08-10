@@ -11,7 +11,7 @@ supabaseClient.rpc('test_auth_role').then(({ data, error }) => {
     console.log("ROLE ERROR:", error);
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const eventId = new URLSearchParams(window.location.search).get('event_id');
 
     const eventIdInput = document.querySelector('#event_id');
@@ -20,11 +20,27 @@ document.addEventListener('DOMContentLoaded', () => {
         eventIdInput.value = eventId;
     }
 
+    console.log("EVENT ID FROM URL:", eventId);
+
+    const { data: eventData, error: eventError } = await supabaseClient
+    .from('events')
+    .select('age_min, age_max')
+    .eq('id', eventId)
+    .single();
+
+if (eventError) {
+    console.error("EVENT ERROR:", eventError);
+    return;
+}
+
+console.log("EVENT AGE LIMITS:", eventData);
+
+    
+
+
     const form = document.querySelector('#registrationForm');
     const phone = document.querySelector('#phone');
     const genderError = document.querySelector('.gender-error');
-
-    console.log("EVENT ID FROM URL:", eventId);
 
 
     const isCzechPhone = (value) => {
@@ -77,27 +93,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const registrationData = {
 
-            nickname: form.elements.nickname.value.trim(),
+    nickname: form.elements.nickname.value.trim(),
+    gender: selectedGender.value,
+    age: Number(form.elements.age.value),
+    email: form.elements.email.value.trim(),
+    phone: form.elements.phone.value.trim(),
+    event_id: form.elements.event_id.value
 
-            gender: selectedGender.value,
+};
 
-            age: Number(form.elements.age.value),
-
-            email: form.elements.email.value.trim(),
-
-            phone: form.elements.phone.value.trim(),
-
-            event_id: form.elements.event_id.value
-
-        };
+console.log("Odesílám:", registrationData);
 
 
-        console.log("Odesílám:", registrationData);
+if (
+    registrationData.age < eventData.age_min ||
+    registrationData.age > eventData.age_max
+) {
+    alert(
+        `Tato akce je určena pro věk ${eventData.age_min}–${eventData.age_max} let.`
+    );
+
+    return;
+}
 
 
-
-        // 1) vytvoření uživatele
-        const { data: user, error: userError } = await supabaseClient
+// 1) vytvoření uživatele
+const { data: user, error: userError } = await supabaseClient
     .from('users')
     .insert({
         nickname: registrationData.nickname,
