@@ -104,7 +104,7 @@ async function loadGenderCounts() {
         // Najdeme ID akce podle názvu
         const { data: event, error: eventError } = await supabaseClient
             .from('events')
-            .select('id')
+            .select('id, capacity_m, capacity_f')
             .eq('name', eventName)
             .single();
 
@@ -116,7 +116,7 @@ async function loadGenderCounts() {
         // Načteme registrace této konkrétní akce
         const { data: registrations, error: registrationError } = await supabaseClient
             .from('registrations')
-            .select('gender')
+            .select('user_id, users(gender)')
             .eq('event_id', event.id);
 
         if (registrationError) {
@@ -129,11 +129,11 @@ async function loadGenderCounts() {
 
         for (const registration of registrations) {
 
-            if (registration.gender === "Muž") {
+            if (registration.users.gender === "Muž") {
                 men++;
             }
 
-            if (registration.gender === "Žena") {
+            if (registration.users.gender === "Žena") {
                 women++;
             }
         }
@@ -142,6 +142,8 @@ async function loadGenderCounts() {
         const menElement = modal.querySelector('.men-count');
         const womenElement = modal.querySelector('.women-count');
 
+ 
+
         if (menElement) {
             menElement.textContent = men;
         }
@@ -149,5 +151,17 @@ async function loadGenderCounts() {
         if (womenElement) {
             womenElement.textContent = women;
         }
+
+               const menCapacityElement = modal.querySelector('.men-capacity');
+        const womenCapacityElement = modal.querySelector('.women-capacity');
+        
+        if (menCapacityElement) {
+            menCapacityElement.textContent = event.capacity_m;
+        }
+
+        if (womenCapacityElement) {
+            womenCapacityElement.textContent = event.capacity_f;
+        }
+
     }
 }

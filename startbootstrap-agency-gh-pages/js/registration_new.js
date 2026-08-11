@@ -115,24 +115,33 @@ if (
 
     return;
 }
-const { count, error: countError } = await supabaseClient
+console.log("START CAPACITY CHECK");
+console.log("EVENT:", registrationData.event_id);
+console.log("GENDER:", registrationData.gender);
+
+const { data: registrations, error: countError } = await supabaseClient
     .from('registrations')
-    .select('*', { count: 'exact', head: true })
-    .eq('event_id', registrationData.event_id)
-    .eq('gender', registrationData.gender);
+    .select('user_id')
+    .eq('event_id', registrationData.event_id);
+
+console.log("EVENT REGISTRATIONS:", registrations);
+console.log("CAPACITY ERROR:", countError);
 
 if (countError) {
     console.error("COUNT ERROR:", countError);
-
     alert("Nepodařilo se ověřit kapacitu akce.");
     return;
 }
+
+const userIds = registrations.map(registration => registration.user_id);
+
+console.log("USER IDS:", userIds);
 
 const capacity = registrationData.gender === "Muž"
     ? eventData.capacity_m
     : eventData.capacity_f;
 
-if (count >= capacity) {
+if (userIds.length >= capacity) {
     alert(
         `Kapacita pro pohlaví ${registrationData.gender.toLowerCase()} na této akci je již naplněná. Změňte si pohlaví nebo se přihlaště ne jinou akci.`
     );
@@ -141,24 +150,65 @@ if (count >= capacity) {
 }
 
 // 1) vytvoření uživatele
-const { data: user, error: userError } = await supabaseClient
+let user;
+let userError;
+
+// Zkusíme najít uživatele podle emailu
+const { data: existingUser, error: findUserError } = await supabaseClient
     .from('users')
-    .insert({
-        nickname: registrationData.nickname,
-        age: registrationData.age,
-        email: registrationData.email
-    })
-    .select()
-    .single();
+    .select('id')
+    .eq('email', registrationData.email)
+    .maybeSingle();
 
-    console.log("USER DATA:", user);
-    console.log("USER ERROR:", userError);
-            
+if (findUserError) {
+    console.error("FIND USER ERROR:", findUserError);
+    alert("Nepodařilo se ověřit uživatele.");
+    return;
+}
 
 
-        if (userError) {
-    console.log("USER ERROR OBJECT:", userError);
-    console.log("USER ERROR JSON:", JSON.stringify(userError, null, 2));
+// Uživatel už existuje → aktualizujeme údaje
+if (existingUser) {
+
+    const result = await supabaseClient
+        .from('users')
+        .update({
+            nickname: registrationData.nickname,
+            age: registrationData.age
+        })
+        .eq('id', existingUser.id)
+        .select()
+        .single();
+
+    user = result.data;
+    userError = result.error;
+
+
+// Uživatel ještě neexistuje → vytvoříme ho
+} else {
+
+    const result = await supabaseClient
+        .from('users')
+        .insert({
+            nickname: registrationData.nickname,
+            age: registrationData.age,
+            email: registrationData.email,
+            gender: registrationData.gender
+        })
+        .select()
+        .single();
+
+    user = result.data;
+    userError = result.error;
+}
+
+
+console.log("USER DATA:", user);
+console.log("USER ERROR:", userError);
+
+
+if (userError) {
+    console.error("USER ERROR OBJECT:", userError);
 
     alert(
         "Chyba při ukládání uživatele: "
@@ -178,8 +228,6 @@ const { data: user, error: userError } = await supabaseClient
                 user_id: user.id,
 
                 event_id: registrationData.event_id,
-
-                gender: registrationData.gender,
 
                 status: 'reserved'
 
