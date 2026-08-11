@@ -168,8 +168,29 @@ if (findUserError) {
 
 
 // Uživatel už existuje → aktualizujeme údaje
+// Uživatel už existuje → zkontrolujeme registraci na tuto akci
 if (existingUser) {
 
+    const { data: existingRegistration, error: registrationCheckError } =
+        await supabaseClient
+            .from('registrations')
+            .select('id')
+            .eq('user_id', existingUser.id)
+            .eq('event_id', registrationData.event_id)
+            .maybeSingle();
+
+    if (registrationCheckError) {
+        console.error("REGISTRATION CHECK ERROR:", registrationCheckError);
+        alert("Nepodařilo se ověřit, zda už jste na této akci registrováni.");
+        return;
+    }
+
+    if (existingRegistration) {
+        alert("Na tuto akci už jste registrováni.");
+        return;
+    }
+
+    // Není registrován → aktualizujeme údaje
     const result = await supabaseClient
         .from('users')
         .update({
