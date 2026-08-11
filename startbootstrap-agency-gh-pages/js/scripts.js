@@ -102,11 +102,27 @@ async function loadEventInfo(){
         const eventName = modal.dataset.eventName;
 
         // Najdeme ID akce podle názvu
-        const { data: event, error: eventError } = await supabaseClient
+        const { data: events, error: eventError } = await supabaseClient
             .from('events')
-            .select('id, capacity_m, capacity_f, event_time, event_date, location')
+            .select('id, capacity_m, capacity_f, event_time, event_date, location, age_min, age_max')
             .eq('name', eventName)
-            .single();
+
+        console.log("EVENT VARIANTS:", events);
+        console.log("AGES:", events.map(event => ({
+            min: event.age_min,
+            max: event.age_max
+        })));
+
+        const ageOptions = modal.parentElement.querySelector('.age-options');
+        console.log("AGE OPTIONS ELEMENT:", ageOptions);
+
+        for (const event of events) {
+            const ageButton = document.createElement('button');
+
+            ageButton.textContent = `${event.age_min}–${event.age_max} let`;
+
+            ageOptions.appendChild(ageButton);
+        }
 
         if (eventError) {
             console.error(`Event "${eventName}" error:`, eventError);
@@ -117,7 +133,7 @@ async function loadEventInfo(){
         const { data: registrations, error: registrationError } = await supabaseClient
             .from('registrations')
             .select('user_id, users(gender)')
-            .eq('event_id', event.id);
+            .eq('event_id', events.id);
 
         if (registrationError) {
             console.error(`Registrations for "${eventName}" error:`, registrationError);

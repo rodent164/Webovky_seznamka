@@ -11380,3 +11380,16 @@ section#kontakt form#contactForm :-ms-input-placeholder {
 .review-details dt { font-family: "Montserrat", sans-serif; font-weight: 700; }
 .review-details dd { margin: 0; overflow-wrap: anywhere; }
 .registration-confirmation { padding: 1.5rem 0; }
+
+.age-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.age-options button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
