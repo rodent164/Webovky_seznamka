@@ -87,13 +87,13 @@ if (link) {
 }
 
     // Load event registrations
-    loadGenderCounts();
+    loadEventInfo();
 
 });
 
 
 // Count men and women from Supabase
-async function loadGenderCounts() {
+async function loadEventInfo(){
 
     const modals = document.querySelectorAll('.portfolio-modal[data-event-name]');
 
@@ -104,7 +104,7 @@ async function loadGenderCounts() {
         // Najdeme ID akce podle názvu
         const { data: event, error: eventError } = await supabaseClient
             .from('events')
-            .select('id, capacity_m, capacity_f')
+            .select('id, capacity_m, capacity_f, event_time, event_date, location')
             .eq('name', eventName)
             .single();
 
@@ -123,6 +123,24 @@ async function loadGenderCounts() {
             console.error(`Registrations for "${eventName}" error:`, registrationError);
             continue;
         }
+
+        //Uložíme datum/čaas a místo pro zobrazení
+        const eventTimeElement = modal.querySelector('.event-time');
+        const eventDateElement = modal.querySelector('.event-date');
+        const eventLocationElement = modal.querySelector('.event-location');
+
+        if (eventTimeElement) {
+            eventTimeElement.textContent = event.event_time;
+        }
+
+        if (eventDateElement) {
+            eventDateElement.textContent = event.event_date;
+        }
+
+        if (eventLocationElement) {
+            eventLocationElement.textContent = event.location;
+        }
+        
 
         let men = 0;
         let women = 0;
@@ -152,7 +170,7 @@ async function loadGenderCounts() {
             womenElement.textContent = women;
         }
 
-               const menCapacityElement = modal.querySelector('.men-capacity');
+        const menCapacityElement = modal.querySelector('.men-capacity');
         const womenCapacityElement = modal.querySelector('.women-capacity');
         
         if (menCapacityElement) {
