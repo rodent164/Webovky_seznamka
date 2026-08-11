@@ -42,6 +42,9 @@ console.log("EVENT AGE LIMITS:", eventData);
     const phone = document.querySelector('#phone');
     const genderError = document.querySelector('.gender-error');
 
+    form.addEventListener('invalid', (event) => {
+    console.log("INVALID FIELD:", event.target);
+    }, true);
 
     const isCzechPhone = (value) => {
         const normalized = value.replace(/[\s().-]/g, '');
@@ -55,20 +58,31 @@ console.log("EVENT AGE LIMITS:", eventData);
 
 
     form.addEventListener('submit', async (event) => {
-        
+
+    console.log("SUBMIT EVENT", form.dataset.submitting);
+
     if (form.dataset.submitting === 'true') {
         return;
     }
 
-    form.dataset.submitting = 'true';
-
     event.preventDefault();
 
+    form.dataset.submitting = 'true';
+
+    try {
+
+        console.log("SUBMIT START");
+        console.log("FORM DATA:", {
+            nickname: form.elements.nickname.value,
+            age: form.elements.age.value,
+            email: form.elements.email.value,
+            phone: form.elements.phone.value,
+            gender: form.querySelector('input[name="gender"]:checked')?.value
+        });
 
         const selectedGender = form.querySelector(
             'input[name="gender"]:checked'
         );
-
 
         // kontrola telefonu pouze pokud byl vyplněn
         if (phone.value.trim() !== '') {
@@ -81,183 +95,175 @@ console.log("EVENT AGE LIMITS:", eventData);
             phone.setCustomValidity('');
         }
 
-
         genderError.hidden = Boolean(selectedGender);
-
 
         if (!form.checkValidity() || !selectedGender) {
             form.classList.add('was-validated');
             return;
         }
 
-
         const registrationData = {
+            nickname: form.elements.nickname.value.trim(),
+            gender: selectedGender.value,
+            age: Number(form.elements.age.value),
+            email: form.elements.email.value.trim(),
+            phone: form.elements.phone.value.trim(),
+            event_id: form.elements.event_id.value
+        };
 
-    nickname: form.elements.nickname.value.trim(),
-    gender: selectedGender.value,
-    age: Number(form.elements.age.value),
-    email: form.elements.email.value.trim(),
-    phone: form.elements.phone.value.trim(),
-    event_id: form.elements.event_id.value
+        console.log("Odesílám:", registrationData);
 
-};
+        if (
+            registrationData.age < eventData.age_min ||
+            registrationData.age > eventData.age_max
+        ) {
+            alert(
+                `Tato akce je určena pro věk ${eventData.age_min}–${eventData.age_max} let.`
+            );
+            return;
+        }
 
-console.log("Odesílám:", registrationData);
+        console.log("START CAPACITY CHECK");
+        console.log("EVENT:", registrationData.event_id);
+        console.log("GENDER:", registrationData.gender);
 
+        const { data: registrations, error: countError } =
+            await supabaseClient
+                .from('registrations')
+                .select('user_id')
+                .eq('event_id', registrationData.event_id);
 
-if (
-    registrationData.age < eventData.age_min ||
-    registrationData.age > eventData.age_max
-) {
-    alert(
-        `Tato akce je určena pro věk ${eventData.age_min}–${eventData.age_max} let.`
-    );
+        console.log("EVENT REGISTRATIONS:", registrations);
+        console.log("CAPACITY ERROR:", countError);
 
-    return;
-}
-console.log("START CAPACITY CHECK");
-console.log("EVENT:", registrationData.event_id);
-console.log("GENDER:", registrationData.gender);
+        if (countError) {
+            console.error("COUNT ERROR:", countError);
+            alert("Nepodařilo se ověřit kapacitu akce.");
+            return;
+        }
 
-const { data: registrations, error: countError } = await supabaseClient
-    .from('registrations')
-    .select('user_id')
-    .eq('event_id', registrationData.event_id);
+        const userIds = registrations.map(
+            registration => registration.user_id
+        );
 
-console.log("EVENT REGISTRATIONS:", registrations);
-console.log("CAPACITY ERROR:", countError);
+        console.log("USER IDS:", userIds);
 
-if (countError) {
-    console.error("COUNT ERROR:", countError);
-    alert("Nepodařilo se ověřit kapacitu akce.");
-    return;
-}
+        const capacity = registrationData.gender === "Muž"
+            ? eventData.capacity_m
+            : eventData.capacity_f;
 
-const userIds = registrations.map(registration => registration.user_id);
+        if (userIds.length >= capacity) {
+            alert(
+                `Kapacita pro pohlaví ${registrationData.gender.toLowerCase()} na této akci je již naplněná. Změňte si pohlaví nebo se přihlaste na jinou akci.`
+            );
+            return;
+        }
 
-console.log("USER IDS:", userIds);
+        // 1) vytvoření uživatele
+        let user;
+        let userError;
 
-const capacity = registrationData.gender === "Muž"
-    ? eventData.capacity_m
-    : eventData.capacity_f;
+        // Zkusíme najít uživatele podle emailu
+        const { data: existingUser, error: findUserError } =
+            await supabaseClient
+                .from('users')
+                .select('id')
+                .eq('email', registrationData.email)
+                .maybeSingle();
 
-if (userIds.length >= capacity) {
-    alert(
-        `Kapacita pro pohlaví ${registrationData.gender.toLowerCase()} na této akci je již naplněná. Změňte si pohlaví nebo se přihlaště ne jinou akci.`
-    );
+        if (findUserError) {
+            console.error("FIND USER ERROR:", findUserError);
+            alert("Nepodařilo se ověřit uživatele.");
+            return;
+        }
 
-    return;
-}
+        // Uživatel už existuje → zkontrolujeme registraci na tuto akci
+        if (existingUser) {
 
-// 1) vytvoření uživatele
-let user;
-let userError;
+            const {
+                data: existingRegistration,
+                error: registrationCheckError
+            } = await supabaseClient
+                .from('registrations')
+                .select('id')
+                .eq('user_id', existingUser.id)
+                .eq('event_id', registrationData.event_id)
+                .maybeSingle();
 
-// Zkusíme najít uživatele podle emailu
-const { data: existingUser, error: findUserError } = await supabaseClient
-    .from('users')
-    .select('id')
-    .eq('email', registrationData.email)
-    .maybeSingle();
+            if (registrationCheckError) {
+                console.error(
+                    "REGISTRATION CHECK ERROR:",
+                    registrationCheckError
+                );
 
-if (findUserError) {
-    console.error("FIND USER ERROR:", findUserError);
-    alert("Nepodařilo se ověřit uživatele.");
-    return;
-}
+                alert(
+                    "Nepodařilo se ověřit, zda už jste na této akci registrováni."
+                );
 
+                return;
+            }
 
-// Uživatel už existuje → aktualizujeme údaje
-// Uživatel už existuje → zkontrolujeme registraci na tuto akci
-if (existingUser) {
+            if (existingRegistration) {
+                alert("Na tuto akci už jste registrováni.");
+                return;
+            }
 
-    const { data: existingRegistration, error: registrationCheckError } =
-        await supabaseClient
-            .from('registrations')
-            .select('id')
-            .eq('user_id', existingUser.id)
-            .eq('event_id', registrationData.event_id)
-            .maybeSingle();
+            // Není registrován → aktualizujeme údaje
+            const result = await supabaseClient
+                .from('users')
+                .update({
+                    nickname: registrationData.nickname,
+                    age: registrationData.age
+                })
+                .eq('id', existingUser.id)
+                .select()
+                .single();
 
-    if (registrationCheckError) {
-        console.error("REGISTRATION CHECK ERROR:", registrationCheckError);
-        alert("Nepodařilo se ověřit, zda už jste na této akci registrováni.");
-        return;
-    }
+            user = result.data;
+            userError = result.error;
 
-    if (existingRegistration) {
-        alert("Na tuto akci už jste registrováni.");
-        return;
-    }
+        } else {
 
-    // Není registrován → aktualizujeme údaje
-    const result = await supabaseClient
-        .from('users')
-        .update({
-            nickname: registrationData.nickname,
-            age: registrationData.age
-        })
-        .eq('id', existingUser.id)
-        .select()
-        .single();
+            // Uživatel ještě neexistuje → vytvoříme ho
+            const result = await supabaseClient
+                .from('users')
+                .insert({
+                    nickname: registrationData.nickname,
+                    age: registrationData.age,
+                    email: registrationData.email,
+                    gender: registrationData.gender
+                })
+                .select()
+                .single();
 
-    user = result.data;
-    userError = result.error;
+            user = result.data;
+            userError = result.error;
+        }
 
+        console.log("USER DATA:", user);
+        console.log("USER ERROR:", userError);
 
-// Uživatel ještě neexistuje → vytvoříme ho
-} else {
+        if (userError) {
+            console.error("USER ERROR OBJECT:", userError);
 
-    const result = await supabaseClient
-        .from('users')
-        .insert({
-            nickname: registrationData.nickname,
-            age: registrationData.age,
-            email: registrationData.email,
-            gender: registrationData.gender
-        })
-        .select()
-        .single();
+            alert(
+                "Chyba při ukládání uživatele: "
+                + JSON.stringify(userError)
+            );
 
-    user = result.data;
-    userError = result.error;
-}
-
-
-console.log("USER DATA:", user);
-console.log("USER ERROR:", userError);
-
-
-if (userError) {
-    console.error("USER ERROR OBJECT:", userError);
-
-    alert(
-        "Chyba při ukládání uživatele: "
-        + JSON.stringify(userError)
-    );
-
-    return;
-}
-
-
+            return;
+        }
 
         // 2) vytvoření rezervace
         const { error: registrationError } = await supabaseClient
             .from('registrations')
             .insert({
-
                 user_id: user.id,
-
                 event_id: registrationData.event_id,
-
                 status: 'reserved'
-
             });
 
-
-
         if (registrationError) {
-
             console.error(registrationError);
 
             alert(
@@ -268,18 +274,18 @@ if (userError) {
             return;
         }
 
-
-
         // uložení pro review stránku
-
         sessionStorage.setItem(
             'registrationDetails',
             JSON.stringify(registrationData)
         );
 
-
         window.location.href = 'review.html';
 
-    });
+    } finally {
 
+        form.dataset.submitting = 'false';
+    }
+
+    });
 });
