@@ -113,6 +113,12 @@ window.addEventListener('DOMContentLoaded', event => {
                 ageButton.textContent = `${event.age_min}–${event.age_max} let`;
                 ageButton.addEventListener('click', async () => {
                     const modal = document.querySelector('#portfolioModal1');
+                    const eventTitleElement = modal.querySelector('.event-title');
+
+                    if (eventTitleElement) {
+                        eventTitleElement.textContent =
+                            `Deskové hry (${event.age_min}–${event.age_max} let)`;
+                    }
 
                     const eventDateElement = modal.querySelector('.event-date');
                     const eventTimeElement = modal.querySelector('.event-time');
