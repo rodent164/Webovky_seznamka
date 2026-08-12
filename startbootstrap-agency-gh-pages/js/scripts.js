@@ -97,6 +97,7 @@ window.addEventListener('DOMContentLoaded', event => {
                     age_min,
                     age_max,
                     event_categories (
+                        id,
                         name,
                         image_main,
                         image_detail,
@@ -139,6 +140,10 @@ window.addEventListener('DOMContentLoaded', event => {
             }
 
             console.log("CATEGORY:", events[0].event_categories);
+            console.log(
+                "CATEGORY ID:",
+                events[0].event_categories?.id
+            );
 
             console.log("AGES:", events.map(event => ({
                 min: event.age_min,
@@ -147,6 +152,22 @@ window.addEventListener('DOMContentLoaded', event => {
 
             const ageOptions = modal.parentElement.querySelector('.age-options');
             console.log("AGE OPTIONS ELEMENT:", ageOptions);
+
+
+            const futureInterestButton =
+                modal.querySelector('.future-interest-button');
+
+            if (futureInterestButton && events[0].event_categories) {
+                futureInterestButton.style.display = '';
+
+                futureInterestButton.dataset.categoryId =
+                    events[0].event_categories.id;
+
+                console.log(
+                    "FUTURE INTEREST CATEGORY ID:",
+                    futureInterestButton.dataset.categoryId
+                );
+            }
 
             for (const event of events) {
 
