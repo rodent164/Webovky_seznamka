@@ -115,6 +115,29 @@ window.addEventListener('DOMContentLoaded', event => {
                 continue;
             }
 
+            const descriptionElement = modal.querySelector('.event-description');
+
+            if (descriptionElement && events[0].event_categories) {
+                descriptionElement.textContent =
+                    events[0].event_categories.description;
+            }
+
+            const practicalInfo = modal.querySelector('.event-practical-info');
+
+            if (practicalInfo) {
+                practicalInfo.style.display = 'none';
+            }
+            const detailImage = modal.querySelector('.event-detail-image');
+
+            const { data: detailImageData } = supabaseClient
+                .storage
+                .from('event-images')
+                .getPublicUrl(events[0].event_categories.image_detail);
+
+            if (detailImage) {
+                detailImage.src = detailImageData.publicUrl;
+            }
+
             console.log("CATEGORY:", events[0].event_categories);
 
             console.log("AGES:", events.map(event => ({
@@ -144,6 +167,14 @@ window.addEventListener('DOMContentLoaded', event => {
                 ageButton.textContent = `${event.age_min}–${event.age_max} let`;
 
                 ageButton.addEventListener('click', async () => {
+
+                    const practicalInfo = modal.querySelector('.event-practical-info');
+
+                    if (practicalInfo) {
+                        practicalInfo.style.display = '';
+                    }
+
+
                     const detailImage = modal.querySelector('.event-detail-image');
                     console.log("DETAIL IMAGE:", detailImage);
                     console.log("DETAIL IMAGE NAME:", event.event_categories.image_detail);
@@ -231,7 +262,28 @@ window.addEventListener('DOMContentLoaded', event => {
         } // konec for (const modal of modals)
 
     } // konec loadEventInfo()
+    document.querySelectorAll('.portfolio-modal').forEach(modal => {
+        modal.addEventListener('show.bs.modal', () => {
 
+            const practicalInfo = modal.querySelector('.event-practical-info');
+
+            if (practicalInfo) {
+                practicalInfo.style.display = 'none';
+            }
+
+            const eventTitleElement = modal.querySelector('.event-title');
+
+            if (eventTitleElement) {
+                eventTitleElement.textContent = modal.dataset.eventName;
+            }
+
+            const eventImage = modal.querySelector('.event-detail-image');
+
+            const eventName = modal.dataset.eventName;
+
+        });
+
+    });
     loadEventInfo();
 
 }); // konec window.addEventListener('DOMContentLoaded', ...)
