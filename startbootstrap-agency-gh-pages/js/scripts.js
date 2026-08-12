@@ -85,19 +85,37 @@ window.addEventListener('DOMContentLoaded', event => {
         for (const modal of modals) {
 
             const eventName = modal.dataset.eventName;
-
-            // Najdeme ID akce podle názvu
             const { data: events, error: eventError } = await supabaseClient
                 .from('events')
-                .select('id, capacity_m, capacity_f, event_time, event_date, location, age_min, age_max')
-                .eq('name', eventName)
+                .select(`
+                    id,
+                    capacity_m,
+                    capacity_f,
+                    event_time,
+                    event_date,
+                    location,
+                    age_min,
+                    age_max,
+                    event_categories (
+                        name,
+                        image_main,
+                        image_detail,
+                        description
+                    )
+                `)
+                .eq('name', eventName);
 
-            console.log("EVENT VARIANTS:", events);
+
+
+            // Najdeme ID akce podle názvu
+
 
             if (eventError) {
                 console.error(`Event "${eventName}" error:`, eventError);
                 continue;
             }
+
+            console.log("CATEGORY:", events[0].event_categories);
 
             console.log("AGES:", events.map(event => ({
                 min: event.age_min,
@@ -108,17 +126,44 @@ window.addEventListener('DOMContentLoaded', event => {
             console.log("AGE OPTIONS ELEMENT:", ageOptions);
 
             for (const event of events) {
+
+                const { data: imageData } = supabaseClient
+                    .storage
+                    .from('event-images')
+                    .getPublicUrl(event.event_categories.image_main);
+
+                const imageElement = modal.parentElement.querySelector('img');
+
+                if (imageElement) {
+                    imageElement.src = imageData.publicUrl;
+                }
+
                 const ageButton = document.createElement('button');
+
                 ageButton.dataset.eventId = event.id;
                 ageButton.textContent = `${event.age_min}–${event.age_max} let`;
+
                 ageButton.addEventListener('click', async () => {
-                    const modal = document.querySelector('#portfolioModal1');
+                    const detailImage = modal.querySelector('.event-detail-image');
+                    console.log("DETAIL IMAGE:", detailImage);
+                    console.log("DETAIL IMAGE NAME:", event.event_categories.image_detail);
+
+                    const { data: detailImageData } = supabaseClient
+                        .storage
+                        .from('event-images')
+                        .getPublicUrl(event.event_categories.image_detail);
+
+                    if (detailImage) {
+                        detailImage.src = detailImageData.publicUrl;
+                    }
+
                     const eventTitleElement = modal.querySelector('.event-title');
 
                     if (eventTitleElement) {
                         eventTitleElement.textContent =
-                            `Deskové hry (${event.age_min}–${event.age_max} let)`;
+                            `${eventName} (${event.age_min}–${event.age_max} let)`;
                     }
+
 
                     const eventDateElement = modal.querySelector('.event-date');
                     const eventTimeElement = modal.querySelector('.event-time');
@@ -142,15 +187,18 @@ window.addEventListener('DOMContentLoaded', event => {
                         return;
                     }
 
+                    console.log("COUNTING EVENT:", event.id);
+                    console.log("REGISTRATIONS:", registrations);
+
                     let men = 0;
                     let women = 0;
 
                     for (const registration of registrations) {
-                        if (registration.users.gender === "Muž") {
+                        if (registration.users?.gender === "Muž") {
                             men++;
                         }
 
-                        if (registration.users.gender === "Žena") {
+                        if (registration.users?.gender === "Žena") {
                             women++;
                         }
                     }
