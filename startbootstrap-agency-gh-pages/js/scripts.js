@@ -196,6 +196,7 @@ window.addEventListener('DOMContentLoaded', event => {
                     }
 
 
+
                     const detailImage = modal.querySelector('.event-detail-image');
                     console.log("DETAIL IMAGE:", detailImage);
                     console.log("DETAIL IMAGE NAME:", event.event_categories.image_detail);
@@ -221,13 +222,25 @@ window.addEventListener('DOMContentLoaded', event => {
                     const eventTimeElement = modal.querySelector('.event-time');
                     const eventLocationElement = modal.querySelector('.event-location');
 
-                    eventDateElement.textContent = event.event_date;
-                    eventTimeElement.textContent = event.event_time;
-                    eventLocationElement.textContent = event.location;
+                    if (eventDateElement) {
+                        eventDateElement.textContent = event.event_date;
+                    }
+
+                    if (eventTimeElement) {
+                        eventTimeElement.textContent = event.event_time;
+                    }
+
+                    if (eventLocationElement) {
+                        eventLocationElement.textContent = event.location;
+                    }
 
                     const registrationLink = modal.querySelector('.registration-link');
 
-                    registrationLink.dataset.eventId = event.id;
+                    if (registrationLink) {
+                        registrationLink.style.display = '';
+                        registrationLink.dataset.eventId = event.id;
+                    }
+
                     const { data: registrations, error: registrationError } =
                         await supabaseClient
                             .from('registrations')
@@ -292,18 +305,19 @@ window.addEventListener('DOMContentLoaded', event => {
                 practicalInfo.style.display = 'none';
             }
 
+            const registrationLink = modal.querySelector('.registration-link');
+
+            if (registrationLink) {
+                registrationLink.style.display = 'none';
+            }
+
             const eventTitleElement = modal.querySelector('.event-title');
 
             if (eventTitleElement) {
                 eventTitleElement.textContent = modal.dataset.eventName;
             }
 
-            const eventImage = modal.querySelector('.event-detail-image');
-
-            const eventName = modal.dataset.eventName;
-
         });
-
     });
     loadEventInfo();
 
