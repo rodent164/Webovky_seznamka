@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const { data: eventData, error: eventError } = await supabaseClient
         .from('events')
-        .select('age_min, age_max, capacity_m, capacity_f')
+        .select('age_min, age_max, capacity_m, capacity_f, event_date, event_time, location')
         .eq('id', eventId)
         .single();
 
@@ -32,6 +32,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("EVENT ERROR:", eventError);
         return;
     }
+
+    const minAgeElement = document.querySelector('.minAge');
+    const maxAgeElement = document.querySelector('.maxAge');
+
+    if (minAgeElement) {
+        minAgeElement.textContent = eventData.age_min;
+    }
+
+    if (maxAgeElement) {
+        maxAgeElement.textContent = eventData.age_max;
+    }
+
+    const eventDateElement = document.querySelector('.eventDate');
+
+    const eventTimeElement = document.querySelector('.eventTime');
+
+    if (eventDateElement) {
+        const [year, month, day] = eventData.event_date.split('-');
+        eventDateElement.textContent = `${day}. ${month}. ${year}`;
+    }
+    if (eventTimeElement) {
+        eventTimeElement.textContent = eventData.event_time.slice(0, 5);
+    }
+
+    const eventLocationElement = document.querySelector('.eventLocation');
+
+    if (eventLocationElement) {
+        eventLocationElement.textContent = eventData.location; // Assuming eventData has an 'event_date' property
+    }
+
 
     console.log("EVENT AGE LIMITS:", eventData);
 
@@ -112,6 +142,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
 
             console.log("Odesílám:", registrationData);
+
+            // let minAge = eventData.age_min;
+            // let maxAge = eventData.age_max;
 
             if (
                 registrationData.age < eventData.age_min ||
