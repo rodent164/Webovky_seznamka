@@ -15,18 +15,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const eventId = new URLSearchParams(window.location.search).get('event_id');
 
     const futureInterest = new URLSearchParams(window.location.search).get('future');
-    const categoryId = new URLSearchParams(window.location.search).get('category_id');
 
     const isFutureInterest = futureInterest === 'true';
 
+    const eventDetailsInfo = document.querySelector('.event-details-info');
+
+    if (eventDetailsInfo && isFutureInterest) {
+        eventDetailsInfo.style.display = 'none';
+    }
+
     console.log("IS FUTURE INTEREST:", isFutureInterest);
     console.log("FUTURE INTEREST:", futureInterest);
-    console.log("CATEGORY ID:", categoryId);
-
-
-
-
-
 
     const eventIdInput = document.querySelector('#event_id');
 
@@ -35,6 +34,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     console.log("EVENT ID FROM URL:", eventId);
+
+
 
     let eventData = null;
 
@@ -49,7 +50,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             capacity_f,
             event_date,
             event_time,
-            location
+            location,
+            category_id,
+            event_categories (
+            name
+        )
         `)
             .eq('id', eventId)
             .single();
@@ -95,6 +100,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log("EVENT AGE LIMITS:", eventData);
     }
 
+    const categoryId = isFutureInterest
+        ? new URLSearchParams(window.location.search).get('category_id')
+        : eventData.category_id;
+
+
+    const { data: categoryData, error: categoryError } =
+        await supabaseClient
+            .from('event_categories')
+            .select('name')
+            .eq('id', categoryId)
+            .single();
+
+    if (categoryError) {
+        console.error("CATEGORY ERROR:", categoryError);
+    } else {
+        console.log("CATEGORY DATA:", categoryData);
+        const eventNameElement = document.querySelector('.registration-event-name');
+        if (eventNameElement) {
+            eventNameElement.textContent = categoryData.name;
+        }
+    }
 
 
 
