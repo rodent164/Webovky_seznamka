@@ -101,7 +101,8 @@ window.addEventListener('DOMContentLoaded', event => {
                         name,
                         image_main,
                         image_detail,
-                        description
+                        description,
+                        more_info
                     )
                 `)
                 .eq('name', eventName);
@@ -196,7 +197,12 @@ window.addEventListener('DOMContentLoaded', event => {
                     if (practicalInfo) {
                         practicalInfo.style.display = '';
                     }
+                    const moreInfoElement = modal.querySelector('.event-more-info');
 
+                    if (moreInfoElement) {
+                        moreInfoElement.textContent =
+                            event.event_categories.more_info || '';
+                    }
 
 
                     const detailImage = modal.querySelector('.event-detail-image');

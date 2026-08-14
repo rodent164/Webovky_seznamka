@@ -123,14 +123,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
 
-
-
-
-
-
     const form = document.querySelector('#registrationForm');
     const phone = document.querySelector('#phone');
     const genderError = document.querySelector('.gender-error');
+
+    const generateUserCode = () => {
+        console.log("generateUserCode called");
+        const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let code = '';
+
+        for (let i = 0; i < 6; i++) {
+            code += characters.charAt(
+                Math.floor(Math.random() * characters.length)
+            );
+        }
+
+        return code;
+    };
 
     form.addEventListener('invalid', (event) => {
         console.log("INVALID FIELD:", event.target);
@@ -330,12 +339,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Uživatel ještě neexistuje → vytvoříme ho
                 const result = await supabaseClient
+             
                     .from('users')
                     .insert({
                         nickname: registrationData.nickname,
                         age: registrationData.age,
                         email: registrationData.email,
-                        gender: registrationData.gender
+                        gender: registrationData.gender,
+                        user_code: generateUserCode()
                     })
                     .select()
                     .single();
