@@ -163,10 +163,12 @@ window.addEventListener('DOMContentLoaded', event => {
                 futureInterestButton.dataset.categoryId =
                     events[0].event_categories.id;
 
-                console.log(
-                    "FUTURE INTEREST CATEGORY ID:",
-                    futureInterestButton.dataset.categoryId
-                );
+                futureInterestButton.addEventListener('click', () => {
+                    const categoryId = futureInterestButton.dataset.categoryId;
+
+                    window.location.href =
+                        `rezervace.html?future=true&category_id=${categoryId}`;
+                });
             }
 
             for (const event of events) {

@@ -14,56 +14,90 @@ supabaseClient.rpc('test_auth_role').then(({ data, error }) => {
 document.addEventListener('DOMContentLoaded', async () => {
     const eventId = new URLSearchParams(window.location.search).get('event_id');
 
+    const futureInterest = new URLSearchParams(window.location.search).get('future');
+    const categoryId = new URLSearchParams(window.location.search).get('category_id');
+
+    const isFutureInterest = futureInterest === 'true';
+
+    console.log("IS FUTURE INTEREST:", isFutureInterest);
+    console.log("FUTURE INTEREST:", futureInterest);
+    console.log("CATEGORY ID:", categoryId);
+
+
+
+
+
+
     const eventIdInput = document.querySelector('#event_id');
 
-    if (eventIdInput) {
+    if (eventIdInput && eventId) {
         eventIdInput.value = eventId;
     }
 
     console.log("EVENT ID FROM URL:", eventId);
 
-    const { data: eventData, error: eventError } = await supabaseClient
-        .from('events')
-        .select('age_min, age_max, capacity_m, capacity_f, event_date, event_time, location')
-        .eq('id', eventId)
-        .single();
+    let eventData = null;
 
-    if (eventError) {
-        console.error("EVENT ERROR:", eventError);
-        return;
+    if (!isFutureInterest) {
+
+        const { data, error } = await supabaseClient
+            .from('events')
+            .select(`
+            age_min,
+            age_max,
+            capacity_m,
+            capacity_f,
+            event_date,
+            event_time,
+            location
+        `)
+            .eq('id', eventId)
+            .single();
+
+        if (error) {
+            console.error("EVENT ERROR:", error);
+            return;
+        }
+
+        eventData = data;
+
+        const minAgeElement = document.querySelector('.minAge');
+        const maxAgeElement = document.querySelector('.maxAge');
+
+        if (minAgeElement) {
+            minAgeElement.textContent = eventData.age_min;
+        }
+
+        if (maxAgeElement) {
+            maxAgeElement.textContent = eventData.age_max;
+        }
+
+        const eventDateElement = document.querySelector('.eventDate');
+        const eventTimeElement = document.querySelector('.eventTime');
+        const eventLocationElement = document.querySelector('.eventLocation');
+
+        if (eventDateElement) {
+            const [year, month, day] = eventData.event_date.split('-');
+            eventDateElement.textContent =
+                `${Number(day)}. ${Number(month)}. ${year}`;
+        }
+
+        if (eventTimeElement) {
+            eventTimeElement.textContent =
+                eventData.event_time.slice(0, 5);
+        }
+
+        if (eventLocationElement) {
+            eventLocationElement.textContent =
+                eventData.location;
+        }
+
+        console.log("EVENT AGE LIMITS:", eventData);
     }
 
-    const minAgeElement = document.querySelector('.minAge');
-    const maxAgeElement = document.querySelector('.maxAge');
-
-    if (minAgeElement) {
-        minAgeElement.textContent = eventData.age_min;
-    }
-
-    if (maxAgeElement) {
-        maxAgeElement.textContent = eventData.age_max;
-    }
-
-    const eventDateElement = document.querySelector('.eventDate');
-
-    const eventTimeElement = document.querySelector('.eventTime');
-
-    if (eventDateElement) {
-        const [year, month, day] = eventData.event_date.split('-');
-        eventDateElement.textContent = `${day}. ${month}. ${year}`;
-    }
-    if (eventTimeElement) {
-        eventTimeElement.textContent = eventData.event_time.slice(0, 5);
-    }
-
-    const eventLocationElement = document.querySelector('.eventLocation');
-
-    if (eventLocationElement) {
-        eventLocationElement.textContent = eventData.location; // Assuming eventData has an 'event_date' property
-    }
 
 
-    console.log("EVENT AGE LIMITS:", eventData);
+
 
 
 
@@ -146,62 +180,62 @@ document.addEventListener('DOMContentLoaded', async () => {
             // let minAge = eventData.age_min;
             // let maxAge = eventData.age_max;
 
-            if (
-                registrationData.age < eventData.age_min ||
-                registrationData.age > eventData.age_max
-            ) {
-                alert(
-                    `Tato akce je určena pro věk ${eventData.age_min}–${eventData.age_max} let.`
+            if (!isFutureInterest) {
+                if (
+                    registrationData.age < eventData.age_min ||
+                    registrationData.age > eventData.age_max
+                ) {
+                    alert(
+                        `Tato akce je určena pro věk ${eventData.age_min}–${eventData.age_max} let.`
+                    );
+                    return;
+                }
+            }
+
+            if (!isFutureInterest) {
+
+                console.log("START CAPACITY CHECK");
+                console.log("EVENT:", registrationData.event_id);
+                console.log("GENDER:", registrationData.gender);
+
+                const { data: registrations, error: countError } =
+                    await supabaseClient
+                        .from('registrations')
+                        .select('user_id, users(gender)')
+                        .eq('event_id', registrationData.event_id);
+
+                console.log("EVENT REGISTRATIONS:", registrations);
+                console.log("CAPACITY ERROR:", countError);
+
+                if (countError) {
+                    console.error("COUNT ERROR:", countError);
+                    alert("Nepodařilo se ověřit kapacitu akce.");
+                    return;
+                }
+
+                const sameGenderRegistrations = registrations.filter(
+                    registration =>
+                        registration.users &&
+                        registration.users.gender === registrationData.gender
                 );
-                return;
+
+                const capacity = registrationData.gender === "Muž"
+                    ? eventData.capacity_m
+                    : eventData.capacity_f;
+
+                console.log("SAME GENDER:", sameGenderRegistrations);
+                console.log("CAPACITY:", capacity);
+                console.log("COUNT:", sameGenderRegistrations.length);
+
+                if (sameGenderRegistrations.length >= capacity) {
+                    alert(
+                        `Kapacita pro pohlaví ${registrationData.gender.toLowerCase()} na této akci je již naplněná. Změňte si pohlaví nebo se přihlaste na jinou akci.`
+                    );
+                    return;
+                }
             }
 
-            console.log("START CAPACITY CHECK");
-            console.log("EVENT:", registrationData.event_id);
-            console.log("GENDER:", registrationData.gender);
 
-            const { data: registrations, error: countError } =
-                await supabaseClient
-                    .from('registrations')
-                    .select('user_id, users(gender)')
-                    .eq('event_id', registrationData.event_id);
-
-            console.log("EVENT REGISTRATIONS:", registrations);
-            console.log("CAPACITY ERROR:", countError);
-
-            if (countError) {
-                console.error("COUNT ERROR:", countError);
-                alert("Nepodařilo se ověřit kapacitu akce.");
-                return;
-            }
-
-            console.log("REGISTRATIONS:", registrations);
-            console.log("REGISTRATION DATA:", registrationData);
-
-            const sameGenderRegistrations = registrations.filter(
-                registration =>
-                    registration.users &&
-                    registration.users.gender === registrationData.gender
-            );
-
-            console.log("USER IDS:", sameGenderRegistrations.map(r => r.user_id));
-
-            const capacity = registrationData.gender === "Muž"
-                ? eventData.capacity_m
-                : eventData.capacity_f;
-
-            console.log("REGISTRATIONS:", registrations);
-            console.log("SAME GENDER:", sameGenderRegistrations);
-            console.log("GENDER:", registrationData.gender);
-            console.log("CAPACITY:", capacity);
-            console.log("COUNT:", sameGenderRegistrations.length);
-
-            if (sameGenderRegistrations.length >= capacity) {
-                alert(
-                    `Kapacita pro pohlaví ${registrationData.gender.toLowerCase()} na této akci je již naplněná. Změňte si pohlaví nebo se přihlaste na jinou akci.`
-                );
-                return;
-            }
 
             // 1) vytvoření uživatele
             let user;
@@ -294,6 +328,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                     "Chyba při ukládání uživatele: "
                     + JSON.stringify(userError)
                 );
+
+                return;
+            }
+
+            if (isFutureInterest) {
+
+                const { error: futureInterestError } =
+                    await supabaseClient
+                        .from('future_event_interests')
+                        .insert({
+                            user_id: user.id,
+                            category_id: Number(categoryId),
+                            status: 'interested'
+                        });
+
+                if (futureInterestError) {
+                    console.error(
+                        "FUTURE INTEREST ERROR:",
+                        futureInterestError
+                    );
+
+                    alert(
+                        "FUTURE INTEREST ERROR: "
+                        + JSON.stringify(futureInterestError)
+                    );
+
+                    return;
+                }
+
+                console.log("FUTURE INTEREST SAVED");
+
+                alert(
+                    "Děkujeme! Zájem o budoucí akci byl uložen."
+                );
+
+                window.location.href = 'index.html';
 
                 return;
             }
