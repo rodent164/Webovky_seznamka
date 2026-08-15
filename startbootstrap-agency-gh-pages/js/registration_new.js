@@ -272,11 +272,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-            // 1) vytvoření uživatele
+            // 1) najdeme nebo vytvoříme uživatele
             let user;
             let userError;
 
-            // Zkusíme najít uživatele podle emailu
             const { data: existingUser, error: findUserError } =
                 await supabaseClient
                     .from('users')
@@ -284,62 +283,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .eq('email', registrationData.email)
                     .maybeSingle();
 
+            console.log("EMAIL HLEDÁNÍ:", registrationData.email);
+            console.log("EXISTING USER:", existingUser);
+            console.log("FIND USER ERROR:", findUserError);
+
             if (findUserError) {
                 console.error("FIND USER ERROR:", findUserError);
                 alert("Nepodařilo se ověřit uživatele.");
                 return;
             }
 
-            // Uživatel už existuje → zkontrolujeme registraci na tuto akci
             if (existingUser) {
 
-                const {
-                    data: existingRegistration,
-                    error: registrationCheckError
-                } = await supabaseClient
-                    .from('registrations')
-                    .select('id')
-                    .eq('user_id', existingUser.id)
-                    .eq('event_id', registrationData.event_id)
-                    .maybeSingle();
+                console.log("EXISTUJÍCÍ UŽIVATEL:", existingUser.id);
 
-                if (registrationCheckError) {
-                    console.error(
-                        "REGISTRATION CHECK ERROR:",
-                        registrationCheckError
-                    );
-
-                    alert(
-                        "Nepodařilo se ověřit, zda už jste na této akci registrováni."
-                    );
-
-                    return;
-                }
-
-                if (existingRegistration) {
-                    alert("Na tuto akci už jste registrováni.");
-                    return;
-                }
-
-                // Není registrován → aktualizujeme údaje
+                // Aktualizujeme údaje existujícího uživatele
                 const result = await supabaseClient
                     .from('users')
                     .update({
                         nickname: registrationData.nickname,
-                        age: registrationData.age
+                        age: registrationData.age,
+                        gender: registrationData.gender
                     })
-                    .eq('id', existingUser.id)
-                    .select()
-                    .single();
+                    .eq('id', existingUser.id);
 
-                user = result.data;
+                user = {
+                    id: existingUser.id
+                };
+
                 userError = result.error;
 
-            } else {
 
+            } else {
+                console.log("JDU DO INSERTU NOVÉHO UŽIVATELE");
                 // Uživatel ještě neexistuje → vytvoříme ho
+
                 const result = await supabaseClient
-             
                     .from('users')
                     .insert({
                         nickname: registrationData.nickname,
@@ -348,28 +327,56 @@ document.addEventListener('DOMContentLoaded', async () => {
                         gender: registrationData.gender,
                         user_code: generateUserCode()
                     })
-                    .select()
+                    .select('id')
                     .single();
 
                 user = result.data;
                 userError = result.error;
             }
 
-            console.log("USER DATA:", user);
+            console.log("USER:", user);
             console.log("USER ERROR:", userError);
 
             if (userError) {
                 console.error("USER ERROR OBJECT:", userError);
 
                 alert(
-                    "Chyba při ukládání uživatele: "
-                    + JSON.stringify(userError)
+                    "Chyba při ukládání uživatele: " +
+                    JSON.stringify(userError)
                 );
 
                 return;
             }
 
+
+            // 2) budoucí zájem
             if (isFutureInterest) {
+
+                const { data: existingInterest, error: interestCheckError } =
+                    await supabaseClient
+                        .from('future_event_interests')
+                        .select('id')
+                        .eq('user_id', user.id)
+                        .eq('category_id', Number(categoryId))
+                        .maybeSingle();
+
+                if (interestCheckError) {
+                    console.error(
+                        "FUTURE INTEREST CHECK ERROR:",
+                        interestCheckError
+                    );
+
+                    alert(
+                        "Nepodařilo se ověřit váš předchozí zájem o tuto akci."
+                    );
+
+                    return;
+                }
+
+                if (existingInterest) {
+                    alert("O tuto akci jste již projevil/a zájem.");
+                    return;
+                }
 
                 const { error: futureInterestError } =
                     await supabaseClient
@@ -387,14 +394,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     );
 
                     alert(
-                        "FUTURE INTEREST ERROR: "
-                        + JSON.stringify(futureInterestError)
+                        "Nepodařilo se uložit váš zájem o budoucí akci: " +
+                        futureInterestError.message
                     );
 
                     return;
                 }
-
-                console.log("FUTURE INTEREST SAVED");
 
                 alert(
                     "Děkujeme! Zájem o budoucí akci byl uložen."
@@ -405,32 +410,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // 2) vytvoření rezervace
-            const { error: registrationError } = await supabaseClient
-                .from('registrations')
-                .insert({
-                    user_id: user.id,
-                    event_id: registrationData.event_id,
-                    status: 'reserved'
-                });
+
+            // 3) vytvoření rezervace
+            const { error: registrationError } =
+                await supabaseClient
+                    .from('registrations')
+                    .insert({
+                        user_id: user.id,
+                        event_id: registrationData.event_id,
+                        status: 'reserved'
+                    });
 
             if (registrationError) {
-                console.error(registrationError);
+                console.error("REGISTRATION ERROR:", registrationError);
 
                 alert(
-                    "Chyba při rezervaci: "
-                    + registrationError.message
+                    "Chyba při rezervaci: " +
+                    registrationError.message
                 );
 
                 return;
             }
+
 
             // uložení pro review stránku
             sessionStorage.setItem(
                 'registrationDetails',
                 JSON.stringify(registrationData)
             );
-
+            //await new Promise(resolve => setTimeout(resolve, 5000)); // SMAZAT!!!
             window.location.href = 'review.html';
 
         } finally {
