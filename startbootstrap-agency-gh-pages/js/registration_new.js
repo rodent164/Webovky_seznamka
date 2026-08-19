@@ -411,6 +411,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
 
+
             // 3) vytvoření rezervace
             const { error: registrationError } =
                 await supabaseClient
@@ -438,6 +439,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 'registrationDetails',
                 JSON.stringify(registrationData)
             );
+
+            sessionStorage.setItem(
+                'paymentUserId',
+                user.id
+            );
+            
             //await new Promise(resolve => setTimeout(resolve, 5000)); // SMAZAT!!!
             window.location.href = 'review.html';
 

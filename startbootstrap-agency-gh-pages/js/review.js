@@ -1,3 +1,7 @@
+const paymentUserId = sessionStorage.getItem('paymentUserId');
+
+console.log("PAYMENT USER ID:", paymentUserId);
+
 document.addEventListener('DOMContentLoaded', () => {
     const savedRegistration = sessionStorage.getItem('registrationDetails');
     let details;
@@ -28,25 +32,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelector('#confirmRegistration').addEventListener('click', async (event) => {
         const button = event.currentTarget;
+
         button.disabled = true;
         button.textContent = 'Přesměrování na platbu…';
 
         try {
-            const response = await fetch('/api/create-checkout-session', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(details)
-            });
-            const result = await response.json();
+            const paymentUserId = sessionStorage.getItem('paymentUserId');
+            const details = JSON.parse(
+                sessionStorage.getItem('registrationDetails')
+            );
 
-            if (!response.ok || !result.url) {
-                throw new Error(result.error || 'Unable to create Checkout Session.');
+            const { data, error } =
+                await supabaseClient.functions.invoke(
+                    'create-checkout-session',
+                    {
+                        body: {
+                            eventId: details.event_id,
+                            userId: paymentUserId
+                        }
+                    }
+                );
+
+            if (error || !data?.url) {
+                console.error("STRIPE ERROR:", error);
+                console.error("STRIPE DATA:", data);
+
+                throw new Error(
+                    error?.message || 'Nepodařilo se vytvořit platbu.'
+                );
             }
 
-            window.location.assign(result.url);
+            window.location.assign(data.url);
+
         } catch (error) {
+            console.error("PAYMENT ERROR:", error);
+
             button.disabled = false;
             button.textContent = 'Zaplatit a potvrdit registraci';
+
             alert('Platbu se nepodařilo zahájit. Zkuste to prosím znovu.');
         }
     });
