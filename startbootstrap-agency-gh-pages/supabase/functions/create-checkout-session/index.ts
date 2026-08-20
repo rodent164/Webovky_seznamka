@@ -1,4 +1,4 @@
-import Stripe from "https://esm.sh/stripe@17.7.0?target=deno";
+import Stripe from "npm:stripe@22";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
   apiVersion: "2025-03-31.basil",
@@ -28,10 +28,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { eventId, userId } = await req.json();
+    const { eventId, userId, registrationId } = await req.json();
 
     console.log("EVENT ID:", eventId);
     console.log("USER ID:", userId);
+    console.log("REGISTRATION ID:", registrationId);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -48,9 +49,12 @@ Deno.serve(async (req) => {
           quantity: 1,
         },
       ],
-
-      success_url: "https://example.com/payment-success",
+      metadata: {
+        registrationId: registrationId
+      },
+      success_url: "https://seznamovaci-akce.netlify.app/confirm_payment.html",
       cancel_url: "https://example.com/payment-cancelled",
+
     });
 
     return new Response(

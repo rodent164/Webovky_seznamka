@@ -1,3 +1,4 @@
+console.log("REVIEW JS NEW VERSION");
 const paymentUserId = sessionStorage.getItem('paymentUserId');
 
 console.log("PAYMENT USER ID:", paymentUserId);
@@ -42,16 +43,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 sessionStorage.getItem('registrationDetails')
             );
 
+            console.log("USER ID FOR INSERT:", paymentUserId);
+            console.log("EVENT ID FOR INSERT:", details.event_id);
+            const { data: registration, error: registrationError } =
+                await supabaseClient
+                    .from('registrations')
+                    .select('id')
+                    .eq('user_id', paymentUserId)
+                    .eq('event_id', details.event_id)
+                    .single();
+
+            if (registrationError) {
+                console.error("REGISTRATION ERROR:", registrationError);
+                throw new Error("Nepodařilo se vytvořit rezervaci.");
+            }
+
+            console.log("REGISTRATION CREATED:", registration);
+            console.log("REGISTRATION OBJECT BEFORE STRIPE:", registration);
+            console.log("REGISTRATION ID BEFORE STRIPE:", registration.id);
+
             const { data, error } =
                 await supabaseClient.functions.invoke(
                     'create-checkout-session',
                     {
                         body: {
                             eventId: details.event_id,
-                            userId: paymentUserId
+                            userId: paymentUserId,
+                            registrationId: registration.id
                         }
                     }
                 );
+            console.log("SENDING TO STRIPE:", {
+                eventId: details.event_id,
+                userId: paymentUserId,
+                registrationId: registration.id
+            });
 
             if (error || !data?.url) {
                 console.error("STRIPE ERROR:", error);
