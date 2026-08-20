@@ -50,6 +50,7 @@ Deno.serve(async (req: Request) => {
     const registrationId = session.metadata?.registrationId;
 
     console.log("REGISTRATION ID:", registrationId);
+
     if (!registrationId) {
       console.error("MISSING REGISTRATION ID");
 
@@ -94,7 +95,12 @@ Deno.serve(async (req: Request) => {
       "REGISTRATION UPDATED TO PAID:",
       registrationId
     );
-    const email = session.metadata?.email;
+
+    // ==========================================
+    // E-MAIL ÚČASTNÍKOVI PŘES WEB3FORMS
+    // ==========================================
+
+    const email = session.customer_details?.email;
 
     if (!email) {
       console.error("MISSING EMAIL");
@@ -117,9 +123,41 @@ Deno.serve(async (req: Request) => {
 
       const emailResult = await emailResponse.text();
 
-      console.log("WEB3FORMS RESPONSE:", emailResult);
+      console.log(
+        "WEB3FORMS RESPONSE:",
+        emailResult
+      );
     }
+
+    // ==========================================
+    // TESTOVACÍ E-MAIL PŘES RESEND
+    // ==========================================
+
+    const resendResponse = await fetch(
+      "https://api.resend.com/emails",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          from: "onboarding@resend.dev",
+          to: "seznamovaci.akce@gmail.com",
+          subject: "Testovací e-mail",
+          text: "Potvrzujeme přijatou platbu."
+        })
+      }
+    );
+
+    const resendResult = await resendResponse.text();
+
+    console.log(
+      "RESEND RESPONSE:",
+      resendResult
+    );
   }
+
   return new Response(
     JSON.stringify({
       received: true
