@@ -69,14 +69,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: {
                             eventId: details.event_id,
                             userId: paymentUserId,
-                            registrationId: registration.id
+                            registrationId: registration.id,
+                            email: details.email
                         }
                     }
                 );
             console.log("SENDING TO STRIPE:", {
                 eventId: details.event_id,
                 userId: paymentUserId,
-                registrationId: registration.id
+                registrationId: registration.id,
+                email: details.email
             });
 
             if (error || !data?.url) {

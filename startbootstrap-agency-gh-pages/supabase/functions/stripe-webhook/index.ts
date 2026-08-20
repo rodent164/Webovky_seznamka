@@ -94,6 +94,31 @@ Deno.serve(async (req: Request) => {
       "REGISTRATION UPDATED TO PAID:",
       registrationId
     );
+    const email = session.metadata?.email;
+
+    if (!email) {
+      console.error("MISSING EMAIL");
+    } else {
+      const emailResponse = await fetch(
+        "https://api.web3forms.com/submit",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            access_key: Deno.env.get("WEB3FORMS_ACCESS_KEY"),
+            email: email,
+            subject: "Potvrzení platby",
+            message: "Potvrzujeme přijatou platbu."
+          })
+        }
+      );
+
+      const emailResult = await emailResponse.text();
+
+      console.log("WEB3FORMS RESPONSE:", emailResult);
+    }
   }
   return new Response(
     JSON.stringify({

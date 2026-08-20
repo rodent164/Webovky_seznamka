@@ -28,11 +28,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { eventId, userId, registrationId } = await req.json();
+    const { eventId, userId, registrationId, email } = await req.json();
 
     console.log("EVENT ID:", eventId);
     console.log("USER ID:", userId);
     console.log("REGISTRATION ID:", registrationId);
+    console.log("EMAIL:", email);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -50,7 +51,8 @@ Deno.serve(async (req) => {
         },
       ],
       metadata: {
-        registrationId: registrationId
+        registrationId: registrationId,
+        email: email
       },
       success_url: "https://seznamovaci-akce.netlify.app/confirm_payment.html",
       cancel_url: "https://example.com/payment-cancelled",
