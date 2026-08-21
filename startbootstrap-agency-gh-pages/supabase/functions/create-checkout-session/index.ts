@@ -30,11 +30,13 @@ Deno.serve(async (req) => {
 
     const { eventId, userId, registrationId, email } = await req.json();
 
+    
     console.log("EVENT ID:", eventId);
     console.log("USER ID:", userId);
     console.log("REGISTRATION ID:", registrationId);
     console.log("EMAIL:", email);
 
+    const siteUrl = Deno.env.get("SITE_URL")!;
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
 
@@ -54,8 +56,8 @@ Deno.serve(async (req) => {
         registrationId: registrationId,
         email: email
       },
-      success_url: "https://seznamovaci-akce.netlify.app/confirm_payment.html",
-      cancel_url: "https://example.com/payment-cancelled",
+      success_url: `${siteUrl}/confirm_payment.html`,
+      cancel_url: `${siteUrl}/payment_failed.html?registrationId=${registrationId}`,
 
     });
 
