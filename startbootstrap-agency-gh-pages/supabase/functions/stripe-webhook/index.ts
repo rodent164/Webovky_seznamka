@@ -96,15 +96,84 @@ Deno.serve(async (req: Request) => {
       registrationId
     );
 
+    const registrationResponse = await fetch(
+      `${supabaseUrl}/rest/v1/registrations?id=eq.${registrationId}&select=user_id,event_id`,
+      {
+        headers: {
+          "apikey": supabaseServiceKey,
+          "Authorization": `Bearer ${supabaseServiceKey}`
+        }
+      }
+    );
+
+    const registrationData = await registrationResponse.json();
+
+    console.log("REGISTRATION DATA:", registrationData);
+    const userResponse = await fetch(
+      `${supabaseUrl}/rest/v1/users?id=eq.${registrationData[0].user_id}&select=nickname,email,user_code`,
+      {
+        headers: {
+          "apikey": supabaseServiceKey,
+          "Authorization": `Bearer ${supabaseServiceKey}`
+        }
+      }
+    );
+
+    const userData = await userResponse.json();
+
+    console.log("USER DATA:", userData);
+
+    const eventResponse = await fetch(
+      `${supabaseUrl}/rest/v1/events?id=eq.${registrationData[0].event_id}&select=name,event_date,event_time,location,category_id,event_categories(name,more_info)`,
+      {
+        headers: {
+          "apikey": supabaseServiceKey,
+          "Authorization": `Bearer ${supabaseServiceKey}`
+        }
+      }
+    );
+
+    const eventData = await eventResponse.json();
+
+    console.log("EVENT DATA:", eventData);
+
     // ==========================================
-    // E-MAIL ÚČASTNÍKOVI PŘES WEB3FORMS
+    // PŘÍPRAVA POTVRZOVACÍHO E-MAILU
     // ==========================================
 
-    const email = session.customer_details?.email;
+    const user = userData[0];
+    const eventDetails = eventData[0];
 
-    if (!email) {
-      console.error("MISSING EMAIL");
+    if (!user || !eventDetails) {
+      console.error("MISSING USER OR EVENT DATA");
     } else {
+
+      const emailText = `
+Potvrzení registrace
+
+Dobrý den,
+
+potvrzujeme přijatou platbu a registraci na seznamovací akci.
+
+Přezdívka: ${user.nickname}
+E-mail: ${user.email}
+Kód uživatele: ${user.user_code}
+
+Akce: ${eventDetails.name}
+Datum: ${eventDetails.event_date}
+Čas: ${eventDetails.event_time}
+Místo: ${eventDetails.location}
+
+Informace o akci:
+${eventDetails.event_categories?.more_info || ""}
+`;
+
+      console.log("EMAIL TEXT:", emailText);
+
+      // ==========================================
+      // E-MAIL ÚČASTNÍKOVI PŘES WEB3FORMS
+      // ==========================================
+
       const emailResponse = await fetch(
         "https://api.web3forms.com/submit",
         {
@@ -114,9 +183,9 @@ Deno.serve(async (req: Request) => {
           },
           body: JSON.stringify({
             access_key: Deno.env.get("WEB3FORMS_ACCESS_KEY"),
-            email: email,
-            subject: "Potvrzení platby",
-            message: "Potvrzujeme přijatou platbu."
+            email: user.email,
+            subject: "Potvrzení registrace na seznamovací akci",
+            message: emailText
           })
         }
       );
@@ -128,10 +197,6 @@ Deno.serve(async (req: Request) => {
         emailResult
       );
     }
-
-    // ==========================================
-    // TESTOVACÍ E-MAIL PŘES RESEND
-    // ==========================================
 
     const resendResponse = await fetch(
       "https://api.resend.com/emails",
@@ -156,7 +221,8 @@ Deno.serve(async (req: Request) => {
       "RESEND RESPONSE:",
       resendResult
     );
-  }
+
+  }  // uzavírá if (event.type === "checkout.session.completed")
 
   return new Response(
     JSON.stringify({
@@ -168,4 +234,4 @@ Deno.serve(async (req: Request) => {
       }
     }
   );
-});
+});  // uzavírá Deno.serve

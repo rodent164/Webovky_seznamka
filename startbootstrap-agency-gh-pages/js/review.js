@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         details = JSON.parse(savedRegistration);
         const fields = {
-            reviewName: details.name,
+            reviewNickname: details.nickname,
             reviewGender: details.gender,
             reviewAge: details.age,
             reviewEmail: details.email,
