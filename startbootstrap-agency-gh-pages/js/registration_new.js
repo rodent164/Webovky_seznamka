@@ -415,25 +415,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
             // 3) vytvoření rezervace
-            const { error: registrationError } =
-                await supabaseClient
-                    .from('registrations')
-                    .insert({
-                        user_id: user.id,
-                        event_id: registrationData.event_id,
-                        status: 'reserved'
-                    });
-
-            if (registrationError) {
-                console.error("REGISTRATION ERROR:", registrationError);
-
-                alert(
-                    "Chyba při rezervaci: " +
-                    registrationError.message
-                );
-
-                return;
-            }
+            
 
 
             // uložení pro review stránku
@@ -448,6 +430,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             );
 
             //await new Promise(resolve => setTimeout(resolve, 5000)); // SMAZAT!!!
+            alert("TEĎ SE PŘESMĚRUJI NA REVIEW");
             window.location.href = 'review.html';
 
         } finally {

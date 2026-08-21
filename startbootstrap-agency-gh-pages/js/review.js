@@ -1,4 +1,4 @@
-console.log("REVIEW JS NEW VERSION");
+
 const paymentUserId = sessionStorage.getItem('paymentUserId');
 
 console.log("PAYMENT USER ID:", paymentUserId);
@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.querySelector('#confirmRegistration').addEventListener('click', async (event) => {
+    alert("KLIK NA ZAPLATIT");
         const button = event.currentTarget;
 
         button.disabled = true;
@@ -45,12 +46,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             console.log("USER ID FOR INSERT:", paymentUserId);
             console.log("EVENT ID FOR INSERT:", details.event_id);
+            alert("JDU VYTVÁŘET REGISTRACI");
+
             const { data: registration, error: registrationError } =
                 await supabaseClient
                     .from('registrations')
+                    .insert({
+                        user_id: paymentUserId,
+                        event_id: details.event_id,
+                        status: 'reserved'
+                    })
                     .select('id')
-                    .eq('user_id', paymentUserId)
-                    .eq('event_id', details.event_id)
                     .single();
 
             if (registrationError) {
