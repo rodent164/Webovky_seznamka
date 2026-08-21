@@ -171,34 +171,39 @@ Deno.serve(async (req: Request) => {
     } else {
 
       // ==========================================
-      // E-MAIL ÚČASTNÍKOVI PŘES WEB3FORMS
+      // E-MAIL ÚČASTNÍKOVI PŘES RESEND
       // ==========================================
 
-      const emailResponse = await fetch(
-        "https://api.web3forms.com/submit",
+      const participantEmailResponse = await fetch(
+        "https://api.resend.com/emails",
         {
           method: "POST",
           headers: {
+            "Authorization": `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            access_key: Deno.env.get("WEB3FORMS_ACCESS_KEY"),
-            email: user.email,
+            from: "onboarding@resend.dev",
+            to: user.email,
             subject: "Potvrzení registrace na seznamovací akci",
-            message: emailText
+            text: emailText
           })
         }
       );
 
-      const emailResult = await emailResponse.text();
+      const participantEmailResult =
+        await participantEmailResponse.text();
 
       console.log(
-        "WEB3FORMS RESPONSE:",
-        emailResult
+        "PARTICIPANT RESEND RESPONSE:",
+        participantEmailResult
       );
     }
+        // ==========================================
+    // E-MAIL ORGANIZÁTOROVI PŘES RESEND
+    // ==========================================
 
-    const resendResponse = await fetch(
+    const organizerEmailResponse = await fetch(
       "https://api.resend.com/emails",
       {
         method: "POST",
@@ -209,20 +214,20 @@ Deno.serve(async (req: Request) => {
         body: JSON.stringify({
           from: "onboarding@resend.dev",
           to: "seznamovaci.akce@gmail.com",
-          subject: "Testovací e-mail",
+          subject: "Nová zaplacená registrace",
           text: emailText
         })
       }
     );
 
-    const resendResult = await resendResponse.text();
+    const organizerEmailResult =
+      await organizerEmailResponse.text();
 
     console.log(
-      "RESEND RESPONSE:",
-      resendResult
+      "ORGANIZER RESEND RESPONSE:",
+      organizerEmailResult
     );
-
-  }  // uzavírá if (event.type === "checkout.session.completed")
+  }
 
   return new Response(
     JSON.stringify({
@@ -234,4 +239,4 @@ Deno.serve(async (req: Request) => {
       }
     }
   );
-});  // uzavírá Deno.serve
+});

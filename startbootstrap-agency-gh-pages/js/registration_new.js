@@ -317,6 +317,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 console.log("JDU DO INSERTU NOVÉHO UŽIVATELE");
                 // Uživatel ještě neexistuje → vytvoříme ho
+                console.log("PHONE Z FORMULÁŘE:", registrationData.phone);
 
                 const result = await supabaseClient
                     .from('users')
@@ -324,6 +325,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         nickname: registrationData.nickname,
                         age: registrationData.age,
                         email: registrationData.email,
+                        phone: registrationData.phone,
                         gender: registrationData.gender,
                         user_code: generateUserCode()
                     })
@@ -444,7 +446,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 'paymentUserId',
                 user.id
             );
-            
+
             //await new Promise(resolve => setTimeout(resolve, 5000)); // SMAZAT!!!
             window.location.href = 'review.html';
 
