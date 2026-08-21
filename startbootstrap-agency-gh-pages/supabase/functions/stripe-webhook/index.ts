@@ -144,31 +144,31 @@ Deno.serve(async (req: Request) => {
     const user = userData[0];
     const eventDetails = eventData[0];
 
+    const emailText = `
+      Potvrzení registrace
+
+      Dobrý den,
+
+      potvrzujeme přijatou platbu a registraci na seznamovací akci.
+
+      Přezdívka: ${user.nickname}
+      E-mail: ${user.email}
+      Kód uživatele: ${user.user_code}
+
+      Akce: ${eventDetails.name}
+      Datum: ${eventDetails.event_date}
+      Čas: ${eventDetails.event_time}
+      Místo: ${eventDetails.location}
+
+      Informace o akci:
+      ${eventDetails.event_categories?.more_info || ""}
+      `;
+
+    console.log("EMAIL TEXT:", emailText);
+
     if (!user || !eventDetails) {
       console.error("MISSING USER OR EVENT DATA");
     } else {
-
-      const emailText = `
-Potvrzení registrace
-
-Dobrý den,
-
-potvrzujeme přijatou platbu a registraci na seznamovací akci.
-
-Přezdívka: ${user.nickname}
-E-mail: ${user.email}
-Kód uživatele: ${user.user_code}
-
-Akce: ${eventDetails.name}
-Datum: ${eventDetails.event_date}
-Čas: ${eventDetails.event_time}
-Místo: ${eventDetails.location}
-
-Informace o akci:
-${eventDetails.event_categories?.more_info || ""}
-`;
-
-      console.log("EMAIL TEXT:", emailText);
 
       // ==========================================
       // E-MAIL ÚČASTNÍKOVI PŘES WEB3FORMS
@@ -210,7 +210,7 @@ ${eventDetails.event_categories?.more_info || ""}
           from: "onboarding@resend.dev",
           to: "seznamovaci.akce@gmail.com",
           subject: "Testovací e-mail",
-          text: "Potvrzujeme přijatou platbu."
+          text: emailText
         })
       }
     );
