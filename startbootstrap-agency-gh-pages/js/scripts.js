@@ -50,272 +50,535 @@ window.addEventListener('DOMContentLoaded', event => {
         });
     });
 
-    const link = document.querySelector('#portfolioModal1 .registration-link');
 
-    if (link) {
-        link.addEventListener('click', async (event) => {
+    // --------------------------------------------------
+    // Load event information from Supabase
+    // --------------------------------------------------
 
-            event.preventDefault();
-
-            const eventId = link.dataset.eventId;
-
-            console.log("REGISTRATION EVENT ID:", eventId);
-
-            window.location.href = `rezervace.html?event_id=${eventId}`;
-        });
-    }
-
-
-    // Count men and women from Supabase
     async function loadEventInfo() {
 
-        const modals = document.querySelectorAll('.portfolio-modal[data-event-name]');
+        const modals = document.querySelectorAll(
+            '.portfolio-modal[data-event-name]'
+        );
+
+        console.log(
+            "NALEZENÉ MODALY:",
+            [...modals].map(modal => ({
+                id: modal.id,
+                eventName: modal.dataset.eventName
+            }))
+        );
+
 
         for (const modal of modals) {
 
             const eventName = modal.dataset.eventName;
-            const { data: events, error: eventError } = await supabaseClient
-                .from('events')
-                .select(`
-                    id,
-                    capacity_m,
-                    capacity_f,
-                    event_time,
-                    event_date,
-                    location,
-                    age_min,
-                    age_max,
-                    event_categories (
+
+            console.log("================================");
+            console.log("MODAL:", modal.id);
+            console.log("EVENT NAME:", eventName);
+
+
+            // --------------------------------------------------
+            // Find category + all events belonging to it
+            // --------------------------------------------------
+
+            const { data: category, error: categoryError } =
+                await supabaseClient
+                    .from('event_categories')
+                    .select(`
                         id,
                         name,
                         image_main,
                         image_detail,
                         description,
-                        more_info
-                    )
-                `)
-                .eq('name', eventName);
+                        more_info,
+                        events (
+                            id,
+                            capacity_m,
+                            capacity_f,
+                            event_time,
+                            event_date,
+                            location,
+                            age_min,
+                            age_max
+                        )
+                    `)
+                    .eq('name', eventName)
+                    .single();
 
 
-
-            // Najdeme ID akce podle názvu
-
-
-            if (eventError) {
-                console.error(`Event "${eventName}" error:`, eventError);
+            if (categoryError) {
+                console.error(
+                    `Category "${eventName}" error:`,
+                    categoryError
+                );
                 continue;
             }
 
-            const descriptionElement = modal.querySelector('.event-description');
 
-            if (descriptionElement && events[0].event_categories) {
+            const events = category.events || [];
+
+
+            console.log("CATEGORY:", category);
+            console.log("EVENTS:", events);
+
+
+            // --------------------------------------------------
+            // Basic category information
+            // --------------------------------------------------
+
+            const descriptionElement =
+                modal.querySelector('.event-description');
+
+            if (descriptionElement) {
                 descriptionElement.textContent =
-                    events[0].event_categories.description;
+                    category.description || '';
             }
 
-            const practicalInfo = modal.querySelector('.event-practical-info');
 
-            if (practicalInfo) {
-                practicalInfo.style.display = 'none';
-            }
-            const detailImage = modal.querySelector('.event-detail-image');
+            const moreInfoElement =
+                modal.querySelector('.event-more-info');
 
-            const { data: detailImageData } = supabaseClient
-                .storage
-                .from('event-images')
-                .getPublicUrl(events[0].event_categories.image_detail);
-
-            if (detailImage) {
-                detailImage.src = detailImageData.publicUrl;
+            if (moreInfoElement) {
+                moreInfoElement.textContent =
+                    category.more_info || '';
             }
 
-            console.log("CATEGORY:", events[0].event_categories);
-            console.log(
-                "CATEGORY ID:",
-                events[0].event_categories?.id
-            );
 
-            console.log("AGES:", events.map(event => ({
-                min: event.age_min,
-                max: event.age_max
-            })));
+            // --------------------------------------------------
+            // Main image
+            // --------------------------------------------------
 
-            const ageOptions = modal.parentElement.querySelector('.age-options');
-            console.log("AGE OPTIONS ELEMENT:", ageOptions);
-
-
-            const futureInterestButton =
-                modal.querySelector('.future-interest-button');
-
-            if (futureInterestButton && events[0].event_categories) {
-                futureInterestButton.style.display = '';
-
-                futureInterestButton.dataset.categoryId =
-                    events[0].event_categories.id;
-
-                futureInterestButton.addEventListener('click', () => {
-                    const categoryId = futureInterestButton.dataset.categoryId;
-
-                    window.location.href =
-                        `rezervace.html?future=true&category_id=${categoryId}`;
-                });
-            }
-
-            for (const event of events) {
-
-                const { data: imageData } = supabaseClient
+            const { data: imageData } =
+                supabaseClient
                     .storage
                     .from('event-images')
-                    .getPublicUrl(event.event_categories.image_main);
+                    .getPublicUrl(category.image_main);
 
-                const imageElement = modal.parentElement.querySelector('img');
+            const mainImage = document.querySelector(
+                `.portfolio-link[href="#${modal.id}"] img`
+            );
 
-                if (imageElement) {
-                    imageElement.src = imageData.publicUrl;
-                }
-
-                const ageButton = document.createElement('button');
-
-                ageButton.dataset.eventId = event.id;
-                ageButton.textContent = `${event.age_min}–${event.age_max} let`;
-
-                ageButton.addEventListener('click', async () => {
-
-                    const practicalInfo = modal.querySelector('.event-practical-info');
-
-                    if (practicalInfo) {
-                        practicalInfo.style.display = '';
-                    }
-                    const moreInfoElement = modal.querySelector('.event-more-info');
-
-                    if (moreInfoElement) {
-                        moreInfoElement.textContent =
-                            event.event_categories.more_info || '';
-                    }
-
-
-                    const detailImage = modal.querySelector('.event-detail-image');
-                    console.log("DETAIL IMAGE:", detailImage);
-                    console.log("DETAIL IMAGE NAME:", event.event_categories.image_detail);
-
-                    const { data: detailImageData } = supabaseClient
-                        .storage
-                        .from('event-images')
-                        .getPublicUrl(event.event_categories.image_detail);
-
-                    if (detailImage) {
-                        detailImage.src = detailImageData.publicUrl;
-                    }
-
-                    const eventTitleElement = modal.querySelector('.event-title');
-
-                    if (eventTitleElement) {
-                        eventTitleElement.textContent =
-                            `${eventName} (${event.age_min}–${event.age_max} let)`;
-                    }
-
-
-                    const eventDateElement = modal.querySelector('.event-date');
-                    const eventTimeElement = modal.querySelector('.event-time');
-                    const eventLocationElement = modal.querySelector('.event-location');
-
-                    if (eventDateElement) {
-                        eventDateElement.textContent = event.event_date;
-                    }
-
-                    if (eventTimeElement) {
-                        eventTimeElement.textContent = event.event_time;
-                    }
-
-                    if (eventLocationElement) {
-                        eventLocationElement.textContent = event.location;
-                    }
-
-                    const registrationLink = modal.querySelector('.registration-link');
-
-                    if (registrationLink) {
-                        registrationLink.style.display = '';
-                        registrationLink.dataset.eventId = event.id;
-                    }
-
-                    const { data: registrations, error: registrationError } =
-                        await supabaseClient
-                            .from('registrations')
-                            .select('user_id, users(gender)')
-                            .eq('event_id', event.id);
-
-                    if (registrationError) {
-                        console.error("REGISTRATION ERROR:", registrationError);
-                        return;
-                    }
-
-                    console.log("COUNTING EVENT:", event.id);
-                    console.log("REGISTRATIONS:", registrations);
-
-                    let men = 0;
-                    let women = 0;
-
-                    for (const registration of registrations) {
-                        if (registration.users?.gender === "Muž") {
-                            men++;
-                        }
-
-                        if (registration.users?.gender === "Žena") {
-                            women++;
-                        }
-                    }
-                    const menElement = modal.querySelector('.men-count');
-                    const womenElement = modal.querySelector('.women-count');
-
-                    if (menElement) {
-                        menElement.textContent = men;
-                    }
-
-                    if (womenElement) {
-                        womenElement.textContent = women;
-                    }
-
-                    const menCapacityElement = modal.querySelector('.men-capacity');
-                    const womenCapacityElement = modal.querySelector('.women-capacity');
-
-                    if (menCapacityElement) {
-                        menCapacityElement.textContent = event.capacity_m;
-                    }
-
-                    if (womenCapacityElement) {
-                        womenCapacityElement.textContent = event.capacity_f;
-                    }
-
-
-                });
-                ageOptions.appendChild(ageButton);
+            if (mainImage) {
+                mainImage.src = imageData.publicUrl;
             }
-        } // konec for (const modal of modals)
 
-    } // konec loadEventInfo()
-    document.querySelectorAll('.portfolio-modal').forEach(modal => {
-        modal.addEventListener('show.bs.modal', () => {
 
-            const practicalInfo = modal.querySelector('.event-practical-info');
+            const imageElement =
+                modal.querySelector('.event-detail-image');
+
+
+            if (imageElement) {
+                imageElement.src = imageData.publicUrl;
+            }
+
+
+            // --------------------------------------------------
+            // Detail image
+            // --------------------------------------------------
+
+            const { data: detailImageData } =
+                supabaseClient
+                    .storage
+                    .from('event-images')
+                    .getPublicUrl(category.image_detail);
+
+
+            if (imageElement) {
+                imageElement.src = detailImageData.publicUrl;
+            }
+
+
+            // --------------------------------------------------
+            // Practical information
+            // --------------------------------------------------
+
+            const practicalInfo =
+                modal.querySelector('.event-practical-info');
 
             if (practicalInfo) {
                 practicalInfo.style.display = 'none';
             }
 
-            const registrationLink = modal.querySelector('.registration-link');
+
+            // --------------------------------------------------
+            // Registration link
+            // --------------------------------------------------
+
+            const registrationLink =
+                modal.querySelector('.registration-link');
 
             if (registrationLink) {
                 registrationLink.style.display = 'none';
             }
 
-            const eventTitleElement = modal.querySelector('.event-title');
 
-            if (eventTitleElement) {
-                eventTitleElement.textContent = modal.dataset.eventName;
+            // --------------------------------------------------
+            // Future interest button
+            // --------------------------------------------------
+
+            const futureInterestButton =
+                modal.querySelector('.future-interest-button');
+
+
+            if (futureInterestButton) {
+
+                futureInterestButton.style.display = '';
+
+                futureInterestButton.dataset.categoryId =
+                    category.id;
+
+
+                futureInterestButton.onclick = () => {
+
+                    const categoryId =
+                        futureInterestButton.dataset.categoryId;
+
+                    window.location.href =
+                        `rezervace.html?future=true&category_id=${categoryId}`;
+                };
             }
 
+
+            // --------------------------------------------------
+            // Age options
+            // --------------------------------------------------
+            const ageOptions = document.querySelector(
+                `.portfolio-link[href="#${modal.id}"] .age-options`
+            );
+
+
+            // Vyčistíme stará tlačítka
+            ageOptions.innerHTML = '';
+
+
+            // --------------------------------------------------
+            // NO FUTURE EVENTS
+            // --------------------------------------------------
+
+            if (events.length === 0) {
+
+                console.log(
+                    `Akce "${eventName}" zatím nemá žádný termín.`
+                );
+
+                if (ageOptions) {
+                    ageOptions.innerHTML =
+                        '<p class="text-muted">Termín této akce zatím není vypsán.</p>';
+                }
+
+                if (practicalInfo) {
+                    practicalInfo.style.display = 'none';
+                }
+
+                if (registrationLink) {
+                    registrationLink.style.display = 'none';
+                }
+
+                if (futureInterestButton) {
+                    futureInterestButton.style.display = '';
+                }
+
+                continue;
+            }
+
+
+            // --------------------------------------------------
+            // EVENTS EXIST
+            // --------------------------------------------------
+
+            if (futureInterestButton) {
+                futureInterestButton.style.display = '';
+            }
+
+
+            // --------------------------------------------------
+            // Create one button for every event / age category
+            // --------------------------------------------------
+
+            for (const event of events) {
+
+                const ageButton =
+                    document.createElement('button');
+
+                ageButton.type = 'button';
+
+                ageButton.className =
+                    'btn btn-outline-primary m-1';
+
+                ageButton.textContent =
+                    `${event.age_min}–${event.age_max} let`;
+
+                ageButton.dataset.eventId =
+                    event.id;
+
+
+                // --------------------------------------------------
+                // Click on age/event
+                // --------------------------------------------------
+
+                ageButton.addEventListener(
+                    'click',
+                    async () => {
+
+                        console.log(
+                            "VYBRANÝ EVENT:",
+                            event
+                        );
+
+
+                        // Practical information
+                        if (practicalInfo) {
+                            practicalInfo.style.display = '';
+                        }
+
+
+                        // More information
+                        if (moreInfoElement) {
+                            moreInfoElement.textContent =
+                                category.more_info || '';
+                        }
+
+
+                        // Event title
+                        const eventTitleElement =
+                            modal.querySelector('.event-title');
+
+                        if (eventTitleElement) {
+                            eventTitleElement.textContent =
+                                `${eventName} (${event.age_min}–${event.age_max} let)`;
+                        }
+
+
+                        // Event date
+                        const eventDateElement =
+                            modal.querySelector('.event-date');
+
+                        if (eventDateElement) {
+                            eventDateElement.textContent =
+                                event.event_date || '';
+                        }
+
+
+                        // Event time
+                        const eventTimeElement =
+                            modal.querySelector('.event-time');
+
+                        if (eventTimeElement) {
+                            eventTimeElement.textContent =
+                                event.event_time || '';
+                        }
+
+
+                        // Event location
+                        const eventLocationElement =
+                            modal.querySelector('.event-location');
+
+                        if (eventLocationElement) {
+                            eventLocationElement.textContent =
+                                event.location || '';
+                        }
+
+
+                        // Detail image
+                        const { data: detailImageData } =
+                            supabaseClient
+                                .storage
+                                .from('event-images')
+                                .getPublicUrl(
+                                    category.image_detail
+                                );
+
+
+                        if (imageElement) {
+                            imageElement.src =
+                                detailImageData.publicUrl;
+                        }
+
+
+                        // --------------------------------------------------
+                        // Registration button
+                        // --------------------------------------------------
+
+                        if (registrationLink) {
+
+                            registrationLink.style.display = '';
+
+                            registrationLink.dataset.eventId =
+                                event.id;
+
+                            registrationLink.onclick =
+                                (clickEvent) => {
+
+                                    clickEvent.preventDefault();
+
+                                    console.log(
+                                        "REGISTRATION EVENT ID:",
+                                        event.id
+                                    );
+
+                                    window.location.href =
+                                        `rezervace.html?event_id=${event.id}`;
+                                };
+                        }
+
+
+                        // --------------------------------------------------
+                        // Count registrations
+                        // --------------------------------------------------
+
+                        const {
+                            data: registrations,
+                            error: registrationError
+                        } = await supabaseClient
+                            .from('registrations')
+                            .select('user_id, users(gender)')
+                            .eq('event_id', event.id);
+
+
+                        if (registrationError) {
+
+                            console.error(
+                                "REGISTRATION ERROR:",
+                                registrationError
+                            );
+
+                            return;
+                        }
+
+
+                        console.log(
+                            "COUNTING EVENT:",
+                            event.id
+                        );
+
+                        console.log(
+                            "REGISTRATIONS:",
+                            registrations
+                        );
+
+
+                        let men = 0;
+                        let women = 0;
+
+
+                        for (const registration of registrations) {
+
+                            if (
+                                registration.users?.gender === "Muž"
+                            ) {
+                                men++;
+                            }
+
+                            if (
+                                registration.users?.gender === "Žena"
+                            ) {
+                                women++;
+                            }
+                        }
+
+
+                        // --------------------------------------------------
+                        // Display counts
+                        // --------------------------------------------------
+
+                        const menElement =
+                            modal.querySelector('.men-count');
+
+                        const womenElement =
+                            modal.querySelector('.women-count');
+
+
+                        if (menElement) {
+                            menElement.textContent = men;
+                        }
+
+
+                        if (womenElement) {
+                            womenElement.textContent = women;
+                        }
+
+
+                        // --------------------------------------------------
+                        // Display capacities
+                        // --------------------------------------------------
+
+                        const menCapacityElement =
+                            modal.querySelector('.men-capacity');
+
+                        const womenCapacityElement =
+                            modal.querySelector('.women-capacity');
+
+
+                        if (menCapacityElement) {
+                            menCapacityElement.textContent =
+                                event.capacity_m;
+                        }
+
+
+                        if (womenCapacityElement) {
+                            womenCapacityElement.textContent =
+                                event.capacity_f;
+                        }
+
+                    }
+                );
+
+
+                ageOptions.appendChild(ageButton);
+            }
+        }
+    }
+
+
+    // --------------------------------------------------
+    // Reset modal whenever it is opened
+    // --------------------------------------------------
+
+    document
+        .querySelectorAll('.portfolio-modal')
+        .forEach(modal => {
+
+            modal.addEventListener(
+                'show.bs.modal',
+                () => {
+
+                    const practicalInfo =
+                        modal.querySelector(
+                            '.event-practical-info'
+                        );
+
+                    if (practicalInfo) {
+                        practicalInfo.style.display = 'none';
+                    }
+
+
+                    const registrationLink =
+                        modal.querySelector(
+                            '.registration-link'
+                        );
+
+                    if (registrationLink) {
+                        registrationLink.style.display = 'none';
+                    }
+
+
+                    const eventTitleElement =
+                        modal.querySelector(
+                            '.event-title'
+                        );
+
+                    if (eventTitleElement) {
+                        eventTitleElement.textContent =
+                            modal.dataset.eventName;
+                    }
+                }
+            );
         });
-    });
+
+
+    // Load everything
     loadEventInfo();
 
-}); // konec window.addEventListener('DOMContentLoaded', ...)
+});

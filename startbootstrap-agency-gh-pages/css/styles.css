@@ -11392,4 +11392,6 @@ section#kontakt form#contactForm :-ms-input-placeholder {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    background-color: white;
+    color: black;
 }
