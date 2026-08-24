@@ -250,7 +250,9 @@ window.addEventListener('DOMContentLoaded', event => {
 
 
             // Vyčistíme stará tlačítka
-            ageOptions.innerHTML = '';
+            if (ageOptions) {
+                ageOptions.innerHTML = '';
+            }
 
 
             // --------------------------------------------------
