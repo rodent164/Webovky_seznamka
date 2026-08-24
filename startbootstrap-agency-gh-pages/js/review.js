@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.querySelector('#confirmRegistration').addEventListener('click', async (event) => {
-    alert("KLIK NA ZAPLATIT");
+        alert("KLIK NA ZAPLATIT");
         const button = event.currentTarget;
 
         button.disabled = true;
@@ -48,16 +48,44 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("EVENT ID FOR INSERT:", details.event_id);
             alert("JDU VYTVÁŘET REGISTRACI");
 
-            const { data: registration, error: registrationError } =
+            let registration;
+            let registrationError;
+
+            const { data: existingRegistration, error: existingRegistrationError } =
                 await supabaseClient
+                    .from('registrations')
+                    .select('id, status')
+                    .eq('user_id', paymentUserId)
+                    .eq('event_id', details.event_id)
+                    .maybeSingle();
+
+            if (existingRegistrationError) {
+                throw new Error("Nepodařilo se ověřit existující rezervaci.");
+            }
+
+            if (existingRegistration) {
+                console.log("EXISTUJÍCÍ REGISTRACE:", existingRegistration);
+
+                registration = existingRegistration;
+            } else {
+                const result = await supabaseClient
                     .from('registrations')
                     .insert({
                         user_id: paymentUserId,
                         event_id: details.event_id,
                         status: 'reserved'
                     })
-                    .select('id')
+                    .select('id, status')
                     .single();
+
+                registration = result.data;
+                registrationError = result.error;
+            }
+
+            if (registrationError) {
+                console.error("REGISTRATION ERROR:", registrationError);
+                throw new Error("Nepodařilo se vytvořit rezervaci.");
+            }
 
             if (registrationError) {
                 console.error("REGISTRATION ERROR:", registrationError);
@@ -107,4 +135,13 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Platbu se nepodařilo zahájit. Zkuste to prosím znovu.');
         }
     });
+});
+
+window.addEventListener('pageshow', () => {
+    const button = document.querySelector('#confirmRegistration');
+
+    if (button) {
+        button.disabled = false;
+        button.textContent = 'Zaplatit a potvrdit registraci';
+    }
 });
