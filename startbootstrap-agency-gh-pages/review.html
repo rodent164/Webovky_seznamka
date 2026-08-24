@@ -47,23 +47,14 @@
                 <div class="d-grid gap-3">
                     <button id="confirmRegistration" class="btn btn-primary btn-xl text-uppercase"
                         type="button">Zaplatit a potvrdit registraci</button>
-                    <a class="btn btn-outline-secondary text-uppercase" id="editRegistration" href="index.html#nase-akce">Zpět</a>
+                    <a class="btn btn-outline-secondary text-uppercase" id="editRegistration"
+                        href="index.html#nase-akce">Zpět</a>
                 </div>
             </div>
         </section>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <script>
-        const SUPABASE_URL = "https://fhsptjjfxseijrironas.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoc3B0ampmeHNlaWpyaXJvbmFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3MTg0NDQsImV4cCI6MjEwMTI5NDQ0NH0.jvEjiZQdsbVXvKT02D5ADISKli28VCmaVMpbM3h88yw";
-
-        const supabaseClient = supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_ANON_KEY
-        );
-    </script>
-
+    <script src="js/supabase-client.js"></script>
     <script src="js/review.js"></script>
 </body>
 
