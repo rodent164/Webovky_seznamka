@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.querySelector('#confirmRegistration').addEventListener('click', async (event) => {
-        alert("KLIK NA ZAPLATIT");
+        //alert("KLIK NA ZAPLATIT");
         const button = event.currentTarget;
 
         button.disabled = true;
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             console.log("USER ID FOR INSERT:", paymentUserId);
             console.log("EVENT ID FOR INSERT:", details.event_id);
-            alert("JDU VYTVÁŘET REGISTRACI");
+            //alert("JDU VYTVÁŘET REGISTRACI");
 
             let registration;
             let registrationError;

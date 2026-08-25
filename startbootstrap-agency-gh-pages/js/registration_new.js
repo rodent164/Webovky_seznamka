@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (sameGenderRegistrations.length >= capacity) {
                     alert(
-                        `Kapacita pro pohlaví ${registrationData.gender.toLowerCase()} na této akci je již naplněná. Změňte si pohlaví nebo se přihlaste na jinou akci.`
+                        `Kapacita pro pohlaví ${registrationData.gender.toLowerCase()} na této akci je již naplněná. Přihlaste se na jinou akci nebo se zaregistrujte jako zájemce o tuto akci v budoucnu.`
                     );
                     return;
                 }
@@ -422,7 +422,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             );
 
             //await new Promise(resolve => setTimeout(resolve, 5000)); // SMAZAT!!!
-            alert("TEĎ SE PŘESMĚRUJI NA REVIEW");
+            //alert("TEĎ SE PŘESMĚRUJI NA REVIEW");
             window.location.href = 'review.html';
 
         } finally {
