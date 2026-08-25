@@ -56,6 +56,99 @@ window.addEventListener('DOMContentLoaded', event => {
     // --------------------------------------------------
 
     async function loadEventInfo() {
+        const { data: categories, error: categoriesError } =
+            await supabaseClient
+                .from('event_categories')
+                .select(`
+            id,
+            name,
+            image_main,
+            image_detail,
+            description,
+            more_info,
+            events (
+                id,
+                capacity_m,
+                capacity_f,
+                event_time,
+                event_date,
+                location,
+                age_min,
+                age_max
+            )
+        `);
+
+        if (categoriesError) {
+            console.error("CHYBA PŘI NAČÍTÁNÍ KATEGORIÍ:", categoriesError);
+            return;
+        }
+
+        console.log("NAČTENÉ KATEGORIE:", categories);
+
+        const eventsContainer =
+            document.querySelector('#events-container');
+
+        if (!eventsContainer) {
+            console.error("Nenalezen #events-container");
+            return;
+        }
+
+        eventsContainer.innerHTML = '';
+
+        for (const category of categories) {
+
+            const column = document.createElement('div');
+            column.className = 'col-lg-4 col-sm-6 mb-4';
+
+            column.innerHTML = `
+        <div class="portfolio-item">
+
+            <a class="portfolio-link"
+               data-bs-toggle="modal"
+               href="#portfolioModal${category.id}">
+
+                <div class="portfolio-hover">
+                    <div class="portfolio-hover-content">
+                        <div class="age-options"></div>
+                    </div>
+                </div>
+
+                <img class="img-fluid event-main-image"
+                     src=""
+                     alt="${category.name}" />
+
+            </a>
+
+            <div class="portfolio-caption">
+
+                <div class="portfolio-caption-heading">
+                    ${category.name}
+                </div>
+
+                <div class="portfolio-caption-subheading text-muted">
+                    ${category.description || ''}
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+            const imageElement =
+                column.querySelector('.event-main-image');
+
+            const { data: imageData } =
+                supabaseClient
+                    .storage
+                    .from('event-images')
+                    .getPublicUrl(category.image_main);
+
+            if (imageElement) {
+                imageElement.src = imageData.publicUrl;
+            }
+
+            eventsContainer.appendChild(column);
+        }
 
         const modals = document.querySelectorAll(
             '.portfolio-modal[data-event-name]'
