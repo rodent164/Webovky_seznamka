@@ -96,7 +96,7 @@ window.addEventListener('DOMContentLoaded', event => {
         eventsContainer.innerHTML = '';
 
         for (const category of categories) {
-
+            const modalId = `event-modal-${category.id}`;
             const column = document.createElement('div');
             column.className = 'col-lg-4 col-sm-6 mb-4';
 
@@ -105,7 +105,7 @@ window.addEventListener('DOMContentLoaded', event => {
 
             <a class="portfolio-link"
                data-bs-toggle="modal"
-               href="#portfolioModal${category.id}">
+               href="#${modalId}">
 
                 <div class="portfolio-hover">
                     <div class="portfolio-hover-content">
@@ -148,24 +148,121 @@ window.addEventListener('DOMContentLoaded', event => {
             }
 
             eventsContainer.appendChild(column);
+            const modal = document.createElement('div');
+
+            modal.className = 'portfolio-modal modal fade';
+            modal.id = modalId;
+            modal.tabIndex = -1;
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-hidden', 'true');
+
+            modal.innerHTML = `
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <button class="close-modal"
+                    data-bs-dismiss="modal"
+                    type="button"
+                    aria-label="Zavřít okno">
+                <i class="fas fa-xmark fa-2x"></i>
+            </button>
+
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+
+                        <div class="modal-body">
+
+                            <h2 class="text-uppercase event-title">
+                                ${category.name}
+                            </h2>
+
+                            <p class="item-intro text-muted event-description">
+                                ${category.description || ''}
+                            </p>
+
+                            <div class="age-options mb-4"></div>
+
+                            <img class="img-fluid d-block mx-auto event-detail-image"
+                                 src=""
+                                 alt="${category.name}" />
+
+                            <p class="event-more-info"></p>
+
+                            <div class="event-practical-info"
+                                 style="display: none;">
+
+                                <ul class="list-inline">
+
+                                    <li>
+                                        <strong>Kdy?</strong>
+                                        <span class="event-date"></span>,
+                                        <span class="event-time"></span>
+                                    </li>
+
+                                    <li>
+                                        <strong>Kde?</strong>
+                                        <span class="event-location"></span>
+                                    </li>
+
+                                </ul>
+
+                                <div>
+                                    Muži:
+                                    <span class="men-count">0</span> /
+                                    <span class="men-capacity">0</span>
+                                    <br>
+
+                                    Ženy:
+                                    <span class="women-count">0</span> /
+                                    <span class="women-capacity">0</span>
+                                </div>
+
+                            </div>
+
+                            <a class="btn btn-primary btn-xl text-uppercase registration-link"
+                               href="#"
+                               style="display: none;">
+                                <i class="fas fa-heart"></i>
+                                Přihlásit se
+                            </a>
+
+                            <button class="btn btn-secondary btn-xl text-uppercase future-interest-button"
+                                    type="button"
+                                    style="display: none;">
+                                Mám zájem o akci v budoucnu
+                            </button>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+`;
+
+            document.body.appendChild(modal);
         }
 
-        const modals = document.querySelectorAll(
-            '.portfolio-modal[data-event-name]'
-        );
+        const modals = categories.map(category => ({
+            category,
+            modal: document.getElementById(`event-modal-${category.id}`)
+        }));
 
-        console.log(
-            "NALEZENÉ MODALY:",
-            [...modals].map(modal => ({
-                id: modal.id,
-                eventName: modal.dataset.eventName
-            }))
-        );
+        // console.log(
+        //     "NALEZENÉ MODALY:",
+        //     [...modals].map(modal => ({
+        //         id: modal.id,
+        //         eventName: modal.dataset.eventName
+        //     }))
+        // );
 
 
-        for (const modal of modals) {
+        for (const { category, modal } of modals) {
 
-            const eventName = modal.dataset.eventName;
+            const eventName = category.name;
 
             console.log("================================");
             console.log("MODAL:", modal.id);
@@ -176,45 +273,11 @@ window.addEventListener('DOMContentLoaded', event => {
             // Find category + all events belonging to it
             // --------------------------------------------------
 
-            const { data: category, error: categoryError } =
-                await supabaseClient
-                    .from('event_categories')
-                    .select(`
-                        id,
-                        name,
-                        image_main,
-                        image_detail,
-                        description,
-                        more_info,
-                        events (
-                            id,
-                            capacity_m,
-                            capacity_f,
-                            event_time,
-                            event_date,
-                            location,
-                            age_min,
-                            age_max
-                        )
-                    `)
-                    .eq('name', eventName)
-                    .single();
-
-
-            if (categoryError) {
-                console.error(
-                    `Category "${eventName}" error:`,
-                    categoryError
-                );
-                continue;
-            }
 
 
             const events = category.events || [];
 
 
-            console.log("CATEGORY:", category);
-            console.log("EVENTS:", events);
 
 
             // --------------------------------------------------
@@ -451,8 +514,10 @@ window.addEventListener('DOMContentLoaded', event => {
                             modal.querySelector('.event-date');
 
                         if (eventDateElement) {
+                            const date = new Date(event.event_date);
+
                             eventDateElement.textContent =
-                                event.event_date || '';
+                                date.toLocaleDateString('cs-CZ');
                         }
 
 
@@ -462,7 +527,9 @@ window.addEventListener('DOMContentLoaded', event => {
 
                         if (eventTimeElement) {
                             eventTimeElement.textContent =
-                                event.event_time || '';
+                                event.event_time
+                                    ? event.event_time.slice(0, 5)
+                                    : '';
                         }
 
 
@@ -664,10 +731,6 @@ window.addEventListener('DOMContentLoaded', event => {
                             '.event-title'
                         );
 
-                    if (eventTitleElement) {
-                        eventTitleElement.textContent =
-                            modal.dataset.eventName;
-                    }
                 }
             );
         });
