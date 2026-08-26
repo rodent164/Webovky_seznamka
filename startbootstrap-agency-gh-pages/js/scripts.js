@@ -54,6 +54,114 @@ window.addEventListener('DOMContentLoaded', event => {
     // --------------------------------------------------
     // Load event information from Supabase
     // --------------------------------------------------
+    async function loadUpcomingEvents() {
+
+        const container =
+            document.getElementById('upcoming-events');
+
+        if (!container) {
+            return;
+        }
+
+        const { data: events, error } =
+            await supabaseClient
+                .from('events')
+                .select(`
+                id,
+                event_date,
+                event_time,
+                age_min,
+                age_max,
+                capacity_m,
+                capacity_f,
+                registrations (
+                    user_id,
+                    users (
+                        gender
+                    )
+                ),
+                event_categories (
+                    id,
+                    name,
+                    image_main
+                )
+            `)
+                .gte('event_date', new Date().toISOString().split('T')[0])
+                .order('event_date', { ascending: true })
+                .order('event_time', { ascending: true })
+                .limit(5);
+
+        if (error) {
+            console.error(
+                'CHYBA PŘI NAČÍTÁNÍ NEJBLIŽŠÍCH AKCÍ:',
+                error
+            );
+            return;
+        }
+
+        console.log('NEJBLIŽŠÍ AKCE:', events);
+        console.log("PRVNÍ AKCE:", events[0]);
+        console.log("KAPACITA MUŽI:", events[0]?.capacity_m);
+        console.log("KAPACITA ŽENY:", events[0]?.capacity_f);
+        console.log("REGISTRACE:", events[0]?.registrations);
+
+        container.innerHTML = '';
+
+        for (const event of events) {
+
+
+            const category = event.event_categories;
+
+            const date = new Date(event.event_date)
+                .toLocaleDateString('cs-CZ');
+
+            const time = event.event_time.slice(0, 5);
+
+            const occupied_m = event.registrations?.filter(
+                registration => registration.users?.gender === "Muž"
+            ).length || 0;
+
+            const occupied_f = event.registrations?.filter(
+                registration => registration.users?.gender === "Žena"
+            ).length || 0;
+
+            const capacity_m = event.capacity_m;
+            const capacity_f = event.capacity_f;
+
+            const row = document.createElement('div');
+
+            row.className =
+                'col-12 d-flex align-items-center justify-content-between mb-3';
+
+            row.innerHTML = `
+                <div>
+                    <strong>${date}</strong>
+                    &nbsp;&nbsp;
+                    ${time}
+                    &nbsp;&nbsp;
+                    <strong>${event.age_min}–${event.age_max} let</strong>
+                    &nbsp;&nbsp;
+                    ${category.name}
+                    &nbsp;&nbsp;
+                    <span>♂ ${occupied_m} / ${capacity_m} &nbsp;&nbsp; ♀ ${occupied_f} / ${capacity_f}</span>
+                </div>
+
+                <a
+                    href="rezervace.html?event_id=${event.id}"
+                    class="btn btn-primary"
+                >
+                    Přihlásit se
+                </a>
+            `;
+
+            container.appendChild(row);
+
+        }
+
+
+
+    }
+
 
     async function loadEventInfo() {
         const { data: categories, error: categoriesError } =
@@ -455,6 +563,11 @@ window.addEventListener('DOMContentLoaded', event => {
             // Create one button for every event / age category
             // --------------------------------------------------
 
+            events.sort((a, b) =>
+                ((a.age_min + a.age_max) / 2) -
+                ((b.age_min + b.age_max) / 2)
+            );
+
             for (const event of events) {
 
                 const ageButton =
@@ -466,7 +579,7 @@ window.addEventListener('DOMContentLoaded', event => {
                     'btn btn-outline-primary m-1';
 
                 ageButton.textContent =
-                    `${event.age_min}–${event.age_max} let`;
+                    `${event.age_min}–${event.age_max} let - ${new Date(event.event_date).toLocaleDateString('cs-CZ')}`;
 
                 ageButton.dataset.eventId =
                     event.id;
@@ -737,6 +850,7 @@ window.addEventListener('DOMContentLoaded', event => {
 
 
     // Load everything
+    loadUpcomingEvents();
     loadEventInfo();
 
 });

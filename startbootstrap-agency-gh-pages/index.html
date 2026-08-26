@@ -30,6 +30,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="#nejblizsi-akce">Nejbližší akce</a></li>
                     <li class="nav-item"><a class="nav-link" href="#o-projektu">O projektu</a></li>
                     <li class="nav-item"><a class="nav-link" href="#nase-akce">Naše akce</a></li>
                     <li class="nav-item"><a class="nav-link" href="#motivace">Motivace</a></li>
@@ -47,6 +48,21 @@
             <a class="btn btn-primary btn-xl text-uppercase" href="#nase-akce">Chci se seznámit</a>
         </div>
     </header>
+    <!-- Nejbližší akce -->
+    <section class="page-section bg-light" id="nejblizsi-akce">
+        <div class="container">
+            <div class="text-center">
+                <h2 class="section-heading text-uppercase">Nejbližší akce</h2>
+                <h3 class="section-subheading-new text-muted">
+                    Vyberte si akci a přijďte se seznámit naživo
+                </h3>
+            </div>
+
+            <div id="upcoming-events" class="row justify-content-center">
+                <!-- Akce se načtou ze Supabase -->
+            </div>
+        </div>
+    </section>
     <!-- O projektu -->
     <section class="page-section" id="o-projektu">
         <div class="container w-75 mx-auto">
@@ -284,322 +300,6 @@
         </div>
     </footer>
 
-    <!-- Portfolio Modals-->
-    <!-- Deskove hry -->
-    <div class="portfolio-modal modal fade" id="portfolioModal1" data-event-name="Deskové hry" tabindex="-1"
-        role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <button class="close-modal" data-bs-dismiss="modal" type="button" aria-label="Zavřít okno"><i
-                        class="fas fa-xmark fa-2x"></i></button>
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-lg-8">
-                            <div class="modal-body">
-                                <!-- Project details-->
-                                <h2 class="text-uppercase event-title">Deskové hry</h2>
-                                <p class="item-intro text-muted event-description"></p>
-                                <img class="img-fluid d-block mx-auto event-detail-image"
-                                    src="assets/img/portfolio/1.jpg" alt="..." />
-                                <p class="event-more-info"></p>
-
-                                <div class="event-practical-info">
-
-                                    <ul class="list-inline">
-                                        <li>
-                                            <strong>Kdy?</strong>
-                                            <span class="event-date"></span>,
-                                            <span class="event-time"></span>
-                                        </li>
-                                        <li>
-                                            <strong>Kde?</strong>
-                                            <span class="event-location"></span>
-                                        </li>
-                                    </ul>
-
-                                    <div>
-                                        Muži: <span class="men-count">0</span>/<span class="men-capacity">0</span><br>
-                                        Ženy: <span class="women-count">0</span>/<span class="women-capacity">0</span>
-                                    </div>
-                                </div>
-
-                                <a class="btn btn-primary btn-xl text-uppercase registration-link"
-                                    data-event-name="Deskové hry" href="#">
-                                    <i class="fas fa-heart"></i>
-                                    Přihlásit se
-                                </a>
-                                <button class="btn btn-secondary btn-xl text-uppercase future-interest-button"
-                                    type="button" style="display: none;">
-                                    Mám zájem o akci v budoucnu
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Soutěže v týmech-->
-    <div class="portfolio-modal modal fade" id="portfolioModal2" data-event-name="Soutěže v týmech" tabindex="-1"
-        role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <button class="close-modal" data-bs-dismiss="modal" type="button" aria-label="Zavřít okno"><i
-                        class="fas fa-xmark fa-2x"></i></button>
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-lg-8">
-
-                            <div class="modal-body">
-                                <h2 class="text-uppercase event-title"></h2>
-
-                                <p class="item-intro text-muted event-description"></p>
-
-                                <img class="img-fluid d-block mx-auto event-detail-image" src="" alt="" />
-
-                                <p class="event-more-info"></p>
-
-                                <div class="event-practical-info">
-
-                                    <ul class="list-inline">
-                                        <li>
-                                            <strong>Kdy?</strong>
-                                            <span class="event-date"></span>,
-                                            <span class="event-time"></span>
-                                        </li>
-
-                                        <li>
-                                            <strong>Kde?</strong>
-                                            <span class="event-location"></span>
-                                        </li>
-                                    </ul>
-
-                                    <div>
-                                        Muži:
-                                        <span class="men-count">0</span>/
-                                        <span class="men-capacity">0</span>
-                                        <br>
-
-                                        Ženy:
-                                        <span class="women-count">0</span>/
-                                        <span class="women-capacity">0</span>
-                                    </div>
-
-                                </div>
-
-                                <a class="btn btn-primary btn-xl text-uppercase registration-link"
-                                    data-event-name="Soutěže v týmech" href="#">
-                                    <i class="fas fa-heart"></i>
-                                    Přihlásit se
-                                </a>
-
-                                <button class="btn btn-secondary btn-xl text-uppercase future-interest-button"
-                                    type="button" style="display: none;">
-                                    Mám zájem o akci v budoucnu
-                                </button>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Výroba svíček -->
-     <div class="portfolio-modal modal fade" id="portfolioModal3" data-event-name="Výroba svíček" tabindex="-1"
-        role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <button class="close-modal" data-bs-dismiss="modal" type="button" aria-label="Zavřít okno"><i
-                        class="fas fa-xmark fa-2x"></i></button>
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-lg-8">
-
-                            <div class="modal-body">
-                                <h2 class="text-uppercase event-title"></h2>
-
-                                <p class="item-intro text-muted event-description"></p>
-
-                                <img class="img-fluid d-block mx-auto event-detail-image" src="" alt="" />
-
-                                <p class="event-more-info"></p>
-
-                                <div class="event-practical-info">
-
-                                    <ul class="list-inline">
-                                        <li>
-                                            <strong>Kdy?</strong>
-                                            <span class="event-date"></span>,
-                                            <span class="event-time"></span>
-                                        </li>
-
-                                        <li>
-                                            <strong>Kde?</strong>
-                                            <span class="event-location"></span>
-                                        </li>
-                                    </ul>
-
-                                    <div>
-                                        Muži:
-                                        <span class="men-count">0</span>/
-                                        <span class="men-capacity">0</span>
-                                        <br>
-
-                                        Ženy:
-                                        <span class="women-count">0</span>/
-                                        <span class="women-capacity">0</span>
-                                    </div>
-
-                                </div>
-
-                                <a class="btn btn-primary btn-xl text-uppercase registration-link"
-                                    data-event-name="Soutěže v týmech" href="#">
-                                    <i class="fas fa-heart"></i>
-                                    Přihlásit se
-                                </a>
-
-                                <button class="btn btn-secondary btn-xl text-uppercase future-interest-button"
-                                    type="button" style="display: none;">
-                                    Mám zájem o akci v budoucnu
-                                </button>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- "Hospodský" kvíz v týmech-->
-    <div class="portfolio-modal modal fade" id="portfolioModal4" tabindex="-1" data-event-name="Pub kvíz" role="dialog"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <button class="close-modal" data-bs-dismiss="modal" type="button" aria-label="Zavřít okno"><i
-                        class="fas fa-xmark fa-2x"></i></button>
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-lg-8">
-                            <div class="modal-body">
-                                <!-- Project details-->
-                                <h2 class="text-uppercase event-title">Pub kvíz v týmech</h2>
-                                <p class="item-intro text-muted">Večer plný testování znalostí, zábavy a nových setkání.
-                                    Nechte se překvapit, koho potkáte u stolu.</p>
-                                <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/1.jpg" alt="..." />
-                                <p>Sem bych napsala praktické info.</p>
-                                <ul class="list-inline">
-                                    <li>
-                                        <strong>Kdy?</strong>
-                                        Datum, čas
-                                    </li>
-                                    <li>
-                                        <strong>Kde?</strong>
-                                        Místo
-                                    </li>
-                                </ul>
-                                <div>
-                                    Muži: <span id="menCount">0</span><br>
-                                    Ženy: <span id="womenCount">0</span>
-                                </div>
-
-                                <a class="btn btn-primary btn-xl text-uppercase" href="rezervace.html">
-                                    <i class="fas fa-heart"></i>
-                                    Přihlásit se
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Luštění šifer-->
-    <div class="portfolio-modal modal fade" id="portfolioModal5" tabindex="-1" data-event-name="Luštění šifer"
-        role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <button class="close-modal" data-bs-dismiss="modal" type="button" aria-label="Zavřít okno"><i
-                        class="fas fa-xmark fa-2x"></i></button>
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-lg-8">
-                            <div class="modal-body">
-                                <!-- Project details-->
-                                <h2 class="text-uppercase event-title">Luštění šifer</h2>
-                                <p class="item-intro text-muted">Večer plný soustředění, "heureka" momentů, neobvyklé
-                                    zábavy a nových setkání. Nechte se překvapit, koho potkáte u stolu.</p>
-                                <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/1.jpg" alt="..." />
-                                <p>Sem bych napsala praktické info.</p>
-                                <ul class="list-inline">
-                                    <li>
-                                        <strong>Kdy?</strong>
-                                        Datum, čas
-                                    </li>
-                                    <li>
-                                        <strong>Kde?</strong>
-                                        Místo
-                                    </li>
-                                </ul>
-                                <div>
-                                    Muži: <span id="menCount">0</span><br>
-                                    Ženy: <span id="womenCount">0</span>
-                                </div>
-
-                                <a class="btn btn-primary btn-xl text-uppercase" href="rezervace.html">
-                                    <i class="fas fa-heart"></i>
-                                    Přihlásit se
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Tvoření-->
-    <div class="portfolio-modal modal fade" id="portfolioModal6" tabindex="-1" data-event-name="Tvoření" role="dialog"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <button class="close-modal" data-bs-dismiss="modal" type="button" aria-label="Zavřít okno"><i
-                        class="fas fa-xmark fa-2x"></i></button>
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-lg-8">
-                            <div class="modal-body">
-                                <!-- Project details-->
-                                <h2 class="text-uppercase event-title">Tvoření</h2>
-                                <p class="item-intro text-muted">Kreativní večer plný zábavy a nových setkání. Nechte se
-                                    překvapit, koho potkáte u stolu.</p>
-                                <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/1.jpg" alt="..." />
-                                <p>Sem bych napsala praktické info.</p>
-                                <ul class="list-inline">
-                                    <li>
-                                        <strong>Kdy?</strong>
-                                        Datum, čas
-                                    </li>
-                                    <li>
-                                        <strong>Kde?</strong>
-                                        Místo
-                                    </li>
-                                </ul>
-                                <div>
-                                    Muži: <span id="menCount">0</span><br>
-                                    Ženy: <span id="womenCount">0</span>
-                                </div>
-
-                                <a class="btn btn-primary btn-xl text-uppercase" href="rezervace.html">
-                                    <i class="fas fa-heart"></i>
-                                    Přihlásit se
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- Bootstrap core JS-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Core theme JS-->
