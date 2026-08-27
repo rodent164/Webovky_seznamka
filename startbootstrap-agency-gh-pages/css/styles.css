@@ -10839,7 +10839,7 @@ p {
 }
 
 .page-section {
-  padding: 6rem 0;
+  padding: 4.5rem 0;
 }
 .page-section h2.section-heading, .page-section .section-heading.h2 {
   font-size: 2.5rem;
@@ -10851,18 +10851,18 @@ p {
   font-weight: 400;
   font-style: italic;
   font-family: "Roboto Slab", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  margin-bottom: 4rem;
+  margin-bottom: 2.5rem;
 }
 .page-section h3.section-subheading-new, .page-section .section-subheadingnew.h3 {
   font-size: 1.3rem;
   font-weight: 400;
   font-family: "Roboto Slab", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  margin-bottom: 4rem;
+  margin-bottom: 2.5rem;
 }
 
 @media (min-width: 768px) {
   section {
-    padding: 9rem 0;
+    padding: 6rem 0;
   }
 }
 .btn-xl {
@@ -10883,10 +10883,10 @@ p {
 }
 
 #mainNav {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  background-color: #212529;
-
+  margin-top: 0;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  background-color: rgba(33, 37, 41, 0.82);
 }
 #mainNav .navbar-toggler {
   padding: 0.75rem;
@@ -10906,19 +10906,28 @@ p {
   height: 1.5rem;
 }
 #mainNav .navbar-nav .nav-item .nav-link {
+  display: inline-block;
+  padding: 0.45rem 0.7rem;
   font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   font-size: 0.95rem;
   color: #fff;
   letter-spacing: 0.0625em;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 0.35rem;
+  background-color: rgba(0, 0, 0, 0.12);
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 #mainNav .navbar-nav .nav-item .nav-link.active, #mainNav .navbar-nav .nav-item .nav-link:hover {
-  color: #000;
+  color: #212529;
+  border-color: #ffc800;
+  background-color: #ffc800;
 }
 
 @media (min-width: 992px) {
   #mainNav {
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
+    margin-top: 0;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
     border: none;
     background-color: transparent;
     transition: padding-top 0.3s ease-in-out, padding-bottom 0.3s ease-in-out;
@@ -10932,9 +10941,9 @@ p {
     transition: height 0.3s ease-in-out;
   }
   #mainNav.navbar-shrink {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    background-color: #212529;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    background-color: rgba(33, 37, 41, 0.95);
   }
   #mainNav.navbar-shrink .navbar-brand {
     font-size: 1.25em;
@@ -10944,15 +10953,16 @@ p {
     height: 1.5rem;
   }
   #mainNav .navbar-nav .nav-item {
-    margin-right: 1rem;
+    margin-right: 0.5rem;
   }
   #mainNav .navbar-nav .nav-item:last-child {
     margin-right: 0;
   }
 }
 header.masthead {
-  padding-top: 10.5rem;
-  padding-bottom: 12.5rem;
+  position: relative;
+  padding-top: 4rem;
+  padding-bottom: 3.5rem;
   text-align: center;
   color: #fff;
   background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("../assets/img/background.jpeg");
@@ -10961,48 +10971,56 @@ header.masthead {
   background-position: center;
   background-size: cover;
   filter: grayscale(5%);
+  border-bottom: 4px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+}
+#nejblizsi-akce {
+  padding-bottom: 3rem;
+}
+#nase-akce {
+  padding-top: 3rem;
 }
 header.masthead .masthead-subheading {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-style: italic;
   line-height: 1.5rem;
-  margin-bottom: 25px;
+  margin-bottom: 0.75rem;
   font-family: "Roboto Slab", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 header.masthead .masthead-heading {
-  font-size: 3.25rem;
+  font-size: 2rem;
   font-weight: 700;
-  line-height: 3.25rem;
-  margin-bottom: 2rem;
+  line-height: 2.5rem;
+  margin-bottom: 0;
   font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 @media (max-width: 767.98px) {
   header.masthead {
-    padding-top: 6.5rem;
-    padding-bottom: 6.5rem;
+    padding-top: 3.75rem;
+    padding-bottom: 3rem;
   }
 }
 
 @media (min-width: 768px) {
   header.masthead {
-    padding-top: 15rem;
-    padding-bottom: 10rem;
+    padding-top: 4rem;
+    padding-bottom: 3.5rem;
   }
   header.masthead .container {
-    transform: translateY(1.5rem);
+    transform: none;
   }
   header.masthead .masthead-subheading {
-    font-size: 2.25rem;
+    font-size: 1.5rem;
     font-style: italic;
-    line-height: 2.25rem;
-    margin-bottom: 2rem;
+    line-height: 1.8rem;
+    margin-bottom: 0.75rem;
   }
   header.masthead .masthead-heading {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 500;
-    line-height: 4.5rem;
-    margin-bottom: 4rem;
+    line-height: 2.5rem;
+    margin-bottom: 0;
   }
 }
 #nase-akce .portfolio-item {
@@ -11048,15 +11066,36 @@ header.masthead .masthead-heading {
   font-style: italic;
   font-family: "Roboto Slab", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
+#nase-akce .portfolio-item .event-terms {
+  margin-top: 1rem;
+}
+#nase-akce .portfolio-item .event-terms-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 700;
+}
+.portfolio-modal .event-terms-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 700;
+}
 
 .portfolio-modal .modal-dialog {
-  margin: 1rem;
-  max-width: 100vw;
+  max-width: 760px;
+  margin: 1.5rem auto;
 }
 .portfolio-modal .modal-content {
-  padding-top: 6rem;
-  padding-bottom: 6rem;
+  padding: 3.5rem 1.5rem;
   text-align: center;
+}
+@media (max-width: 767.98px) {
+  .portfolio-modal .modal-dialog {
+    max-width: calc(100vw - 1.5rem);
+    margin: 0.75rem auto;
+  }
+  .portfolio-modal .modal-content {
+    padding: 2.5rem 1rem;
+  }
 }
 .portfolio-modal .modal-content h2, .portfolio-modal .modal-content .h2 {
   font-size: 3rem;
