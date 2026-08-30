@@ -31,8 +31,8 @@
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
                     <li class="nav-item"><a class="nav-link" href="#nejblizsi-akce">Nejbližší akce</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#o-projektu">O projektu</a></li>
                     <li class="nav-item"><a class="nav-link" href="#nase-akce">Naše akce</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#o-projektu">O projektu</a></li>
                     <li class="nav-item"><a class="nav-link" href="#motivace">Motivace</a></li>
                     <li class="nav-item"><a class="nav-link" href="#organizatori">Organizátoři</a></li>
                     <li class="nav-item"><a class="nav-link" href="#kontakt">Kontakt</a></li>
@@ -45,7 +45,7 @@
         <div class="container">
             <div class="masthead-subheading">Konec swipování v Plzni</div>
             <div class="masthead-heading text-uppercase">Přijďte se seznámit naživo!</div>
-            <a class="btn btn-primary btn-xl text-uppercase" href="#nase-akce">Chci se seznámit</a>
+            <!-- <a class="btn btn-primary btn-xl text-uppercase" href="#nase-akce">Chci se seznámit</a> -->
         </div>
     </header>
     <!-- Nejbližší akce -->
@@ -61,6 +61,20 @@
             <div id="upcoming-events" class="row justify-content-center">
                 <!-- Akce se načtou ze Supabase -->
             </div>
+        </div>
+    </section>
+        <!-- Naše akce -->
+    <section class="page-section bg-light" id="nase-akce">
+        <div class="container">
+            <div class="text-center">
+                <h2 class="section-heading text-uppercase">Naše akce</h2>
+                <h3 class="section-subheading-new text-muted">Vyberte si z připravovaných akcí tu, která vám sedne</h3>
+            </div>
+
+            <div class="row" id="events-container">
+                <!-- Akce se načtou automaticky ze Supabase -->
+            </div>
+
         </div>
     </section>
     <!-- O projektu -->
@@ -99,20 +113,7 @@
 
         </div>
     </section>
-    <!-- Naše akce -->
-    <section class="page-section bg-light" id="nase-akce">
-        <div class="container">
-            <div class="text-center">
-                <h2 class="section-heading text-uppercase">Naše akce</h2>
-                <h3 class="section-subheading-new text-muted">Vyberte si z připravovaných akcí tu, která vám sedne</h3>
-            </div>
 
-            <div class="row" id="events-container">
-                <!-- Akce se načtou automaticky ze Supabase -->
-            </div>
-
-        </div>
-    </section>
     <!-- Motivace -->
     <section class="page-section" id="motivace">
         <div class="container">

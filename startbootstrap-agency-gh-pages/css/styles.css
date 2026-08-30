@@ -10965,7 +10965,7 @@ header.masthead {
   padding-bottom: 3.5rem;
   text-align: center;
   color: #fff;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("../assets/img/background.jpeg");
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("../assets/img/background_new.png");
   background-repeat: no-repeat;
   background-attachment: scroll;
   background-position: center;
@@ -11008,7 +11008,8 @@ header.masthead .masthead-heading {
     padding-bottom: 3.5rem;
   }
   header.masthead .container {
-    transform: none;
+    /* transform: none; */
+    transform: translateY(30px);
   }
   header.masthead .masthead-subheading {
     font-size: 1.5rem;
@@ -11068,6 +11069,10 @@ header.masthead .masthead-heading {
 }
 #nase-akce .portfolio-item .event-terms {
   margin-top: 1rem;
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+  flex-wrap: wrap;
 }
 #nase-akce .portfolio-item .event-terms-label {
   display: block;
