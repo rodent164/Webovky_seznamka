@@ -575,7 +575,8 @@ window.addEventListener('DOMContentLoaded', event => {
                 ageButton.href = `rezervace.html?event_id=${event.id}`;
 
                 ageButton.className =
-                    'btn btn-outline-primary m-1';
+                    'btn btn-primary';
+                // 'btn btn-outline-primary m-1';
 
                 ageButton.textContent =
                     `${event.age_min}–${event.age_max} let - ${new Date(event.event_date).toLocaleDateString('cs-CZ')}`;
