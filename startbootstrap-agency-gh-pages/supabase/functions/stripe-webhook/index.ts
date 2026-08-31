@@ -183,7 +183,7 @@ Deno.serve(async (req: Request) => {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            from: "onboarding@resend.dev",
+            from: "Seznamovací akce <info@seznamovaci-akce.cz>",
             to: user.email,
             subject: "Potvrzení registrace na seznamovací akci",
             text: emailText
@@ -212,7 +212,7 @@ Deno.serve(async (req: Request) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          from: "onboarding@resend.dev",
+          from: "Seznamovací akce <info@seznamovaci-akce.cz>",
           to: "seznamovaci.akce@gmail.com",
           subject: "Nová zaplacená registrace",
           text: emailText
