@@ -11435,10 +11435,10 @@ section#kontakt form#contactForm :-ms-input-placeholder {
 .review-details dd { margin: 0; overflow-wrap: anywhere; }
 .registration-confirmation { padding: 1.5rem 0; }
 
-.age-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.age-options .btn-primary {
+    display: flex !important;
+    justify-content: space-between !important;
+    width: 100% !important;
 }
 
 .age-options button {
@@ -11448,4 +11448,18 @@ section#kontakt form#contactForm :-ms-input-placeholder {
     cursor: pointer;
     background-color: white;
     color: black;
+
+    display: flex !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+}
+
+.age-options .btn-primary span:last-child {
+    margin-left: auto;
+}
+
+#nase-akce .event-terms .btn-primary {
+    display: flex !important;
+    justify-content: space-between !important;
+    width: 100% !important;
 }

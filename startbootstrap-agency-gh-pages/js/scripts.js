@@ -63,6 +63,7 @@ window.addEventListener('DOMContentLoaded', event => {
                 age_max,
                 capacity_m,
                 capacity_f,
+                price,
                 registrations (
                     user_id,
                     users (
@@ -116,6 +117,8 @@ window.addEventListener('DOMContentLoaded', event => {
 
             const capacity_m = event.capacity_m;
             const capacity_f = event.capacity_f;
+
+            const price = event.price;
 
             const row = document.createElement('div');
 
@@ -171,7 +174,8 @@ window.addEventListener('DOMContentLoaded', event => {
                 event_date,
                 location,
                 age_min,
-                age_max
+                age_max,
+                price
             )
         `);
 
@@ -578,8 +582,13 @@ window.addEventListener('DOMContentLoaded', event => {
                     'btn btn-primary';
                 // 'btn btn-outline-primary m-1';
 
-                ageButton.textContent =
-                    `${event.age_min}–${event.age_max} let - ${new Date(event.event_date).toLocaleDateString('cs-CZ')}`;
+                ageButton.innerHTML =
+                    `<span>${event.age_min}–${event.age_max} let - ${new Date(event.event_date).toLocaleDateString('cs-CZ', {
+                        day: 'numeric',
+                        month: 'numeric',
+                        year: '2-digit'
+                    })}</span>
+                    <span>${event.price} Kč</span>`;
 
                 ageButton.dataset.eventId =
                     event.id;

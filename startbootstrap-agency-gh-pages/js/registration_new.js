@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             event_time,
             location,
             category_id,
+            price,
             event_categories (
             name
         )
@@ -72,6 +73,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const eventDateElement = document.querySelector('.eventDate');
         const eventTimeElement = document.querySelector('.eventTime');
         const eventLocationElement = document.querySelector('.eventLocation');
+        const eventPriceElement = document.querySelector('.eventPrice');
 
         if (eventDateElement) {
             const [year, month, day] = eventData.event_date.split('-');
@@ -87,6 +89,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (eventLocationElement) {
             eventLocationElement.textContent =
                 eventData.location;
+        }
+
+        if (eventPriceElement) {
+            eventPriceElement.textContent =
+                eventData.price;
         }
 
         console.log("EVENT AGE LIMITS:", eventData);
