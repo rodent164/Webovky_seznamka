@@ -1,26 +1,15 @@
-// Navbar shrink function
 window.addEventListener('DOMContentLoaded', event => {
 
-    var navbarShrink = function () {
-        const navbarCollapsible = document.body.querySelector('#mainNav');
+    const navbarShrink = () => {
+        const mainNav = document.querySelector('#mainNav');
 
-        if (!navbarCollapsible) {
-            return;
-        }
-
-        if (window.scrollY === 0) {
-            navbarCollapsible.classList.remove('navbar-shrink');
-        } else {
-            navbarCollapsible.classList.add('navbar-shrink');
+        if (mainNav) {
+            mainNav.classList.toggle('navbar-shrink', window.scrollY > 0);
         }
     };
 
-    // Shrink the navbar
     navbarShrink();
-
-    // Shrink the navbar when page is scrolled
-    document.addEventListener('scroll', navbarShrink);
-
+    document.addEventListener('scroll', navbarShrink, { passive: true });
 
     // Activate Bootstrap scrollspy
     const mainNav = document.body.querySelector('#mainNav');
@@ -74,6 +63,7 @@ window.addEventListener('DOMContentLoaded', event => {
                 age_max,
                 capacity_m,
                 capacity_f,
+                price,
                 registrations (
                     user_id,
                     users (
@@ -127,6 +117,8 @@ window.addEventListener('DOMContentLoaded', event => {
 
             const capacity_m = event.capacity_m;
             const capacity_f = event.capacity_f;
+
+            const price = event.price;
 
             const row = document.createElement('div');
 
@@ -182,7 +174,8 @@ window.addEventListener('DOMContentLoaded', event => {
                 event_date,
                 location,
                 age_min,
-                age_max
+                age_max,
+                price
             )
         `);
 
@@ -216,9 +209,7 @@ window.addEventListener('DOMContentLoaded', event => {
                href="#${modalId}">
 
                 <div class="portfolio-hover">
-                    <div class="portfolio-hover-content">
-                        <div class="age-options"></div>
-                    </div>
+                    <div class="portfolio-hover-content"><i class="fas fa-circle-info fa-2x"></i></div>
                 </div>
 
                 <img class="img-fluid event-main-image"
@@ -236,6 +227,8 @@ window.addEventListener('DOMContentLoaded', event => {
                 <div class="portfolio-caption-subheading text-muted">
                     ${category.description || ''}
                 </div>
+
+                <div class="event-terms"></div>
 
             </div>
 
@@ -508,14 +501,19 @@ window.addEventListener('DOMContentLoaded', event => {
             // --------------------------------------------------
             // Age options
             // --------------------------------------------------
-            const ageOptions = document.querySelector(
-                `.portfolio-link[href="#${modal.id}"] .age-options`
-            );
+            const eventCard = document.querySelector(
+                `.portfolio-link[href="#${modal.id}"]`
+            )?.closest('.portfolio-item');
+            const ageOptions = eventCard?.querySelector('.event-terms');
+            const modalAgeOptions = modal.querySelector('.age-options');
 
 
             // Vyčistíme stará tlačítka
             if (ageOptions) {
-                ageOptions.innerHTML = '';
+                ageOptions.innerHTML = '<span class="event-terms-label">Termíny</span>';
+            }
+            if (modalAgeOptions) {
+                modalAgeOptions.innerHTML = '<span class="event-terms-label">Termíny</span>';
             }
 
 
@@ -531,7 +529,11 @@ window.addEventListener('DOMContentLoaded', event => {
 
                 if (ageOptions) {
                     ageOptions.innerHTML =
-                        '<p class="text-muted">Termín této akce zatím není vypsán.</p>';
+                        '<span class="event-terms-label">Termíny</span><p class="text-muted mb-0">Termín této akce zatím není vypsán.</p>';
+                }
+                if (modalAgeOptions) {
+                    modalAgeOptions.innerHTML =
+                        '<span class="event-terms-label">Termíny</span><p class="text-muted mb-0">Termín této akce zatím není vypsán.</p>';
                 }
 
                 if (practicalInfo) {
@@ -571,18 +573,29 @@ window.addEventListener('DOMContentLoaded', event => {
             for (const event of events) {
 
                 const ageButton =
-                    document.createElement('button');
+                    document.createElement('a');
 
-                ageButton.type = 'button';
+                // Termín vede přímo na registraci konkrétní akce.
+                ageButton.href = `rezervace.html?event_id=${event.id}`;
 
                 ageButton.className =
-                    'btn btn-outline-primary m-1';
+                    'btn btn-primary';
+                // 'btn btn-outline-primary m-1';
 
-                ageButton.textContent =
-                    `${event.age_min}–${event.age_max} let - ${new Date(event.event_date).toLocaleDateString('cs-CZ')}`;
+                ageButton.innerHTML =
+                    `<span>${event.age_min}–${event.age_max} let - ${new Date(event.event_date).toLocaleDateString('cs-CZ', {
+                        day: 'numeric',
+                        month: 'numeric',
+                        year: '2-digit'
+                    })}</span>
+                    <span>${event.price} Kč</span>`;
 
                 ageButton.dataset.eventId =
                     event.id;
+
+                if (modalAgeOptions) {
+                    modalAgeOptions.appendChild(ageButton.cloneNode(true));
+                }
 
 
                 // --------------------------------------------------
