@@ -34,12 +34,14 @@ Deno.serve(async (req) => {
     const contactPhone = typeof phone === "string" ? phone.trim() : "";
     const contactMessage = typeof message === "string" ? message.trim() : "";
 
-    if (
-      !contactName || contactName.length > 100 ||
-      !isEmail(contactEmail) || contactEmail.length > 254 ||
-      contactPhone.length > 50 ||
-      !contactMessage || contactMessage.length > 5000
-    ) {
+    const invalidFields = [
+      ...(!contactName || contactName.length > 100 ? ["jméno"] : []),
+      ...(!isEmail(contactEmail) || contactEmail.length > 254 ? ["e-mail"] : []),
+      ...(contactPhone.length > 50 ? ["telefon"] : []),
+      ...(!contactMessage || contactMessage.length > 5000 ? ["zpráva"] : []),
+    ];
+
+    if (invalidFields.length) {
       console.warn("INVALID CONTACT FORM DATA:", {
         hasName: Boolean(contactName),
         nameLength: contactName.length,
@@ -48,7 +50,10 @@ Deno.serve(async (req) => {
         phoneLength: contactPhone.length,
         messageLength: contactMessage.length,
       });
-      return jsonResponse({ error: "Zkontrolujte prosím vyplněné údaje." }, 400);
+      return jsonResponse(
+        { error: `Neplatné nebo chybějící pole: ${invalidFields.join(", ")}.` },
+        400,
+      );
     }
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
