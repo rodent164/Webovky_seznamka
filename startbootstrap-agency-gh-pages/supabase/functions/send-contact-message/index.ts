@@ -40,6 +40,14 @@ Deno.serve(async (req) => {
       contactPhone.length > 50 ||
       !contactMessage || contactMessage.length > 5000
     ) {
+      console.warn("INVALID CONTACT FORM DATA:", {
+        hasName: Boolean(contactName),
+        nameLength: contactName.length,
+        hasValidEmail: isEmail(contactEmail),
+        emailLength: contactEmail.length,
+        phoneLength: contactPhone.length,
+        messageLength: contactMessage.length,
+      });
       return jsonResponse({ error: "Zkontrolujte prosím vyplněné údaje." }, 400);
     }
 

@@ -33,7 +33,14 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             if (error || !data?.success) {
-                throw new Error(error?.message || data?.error || "Zprávu se nepodařilo odeslat.");
+                let errorMessage = data?.error;
+
+                if (!errorMessage && error?.context instanceof Response) {
+                    const errorBody = await error.context.json().catch(() => null);
+                    errorMessage = errorBody?.error;
+                }
+
+                throw new Error(errorMessage || error?.message || "Zprávu se nepodařilo odeslat.");
             }
 
             form.reset();
