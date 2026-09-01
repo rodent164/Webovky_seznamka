@@ -1,8 +1,14 @@
 import Stripe from "npm:stripe@22";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
   apiVersion: "2025-03-31.basil",
 });
+
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,7 +36,45 @@ Deno.serve(async (req) => {
 
     const { eventId, userId, registrationId, email } = await req.json();
 
-    
+    if (typeof eventId !== "string" || !eventId.trim()) {
+      return new Response(
+        JSON.stringify({ error: "Chybí platné ID akce." }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    const { data: event, error: eventError } = await supabase
+      .from("events")
+      .select("price")
+      .eq("id", eventId)
+      .single();
+
+    if (eventError || !event) {
+      console.error("EVENT PRICE LOAD ERROR:", eventError);
+      throw new Error("Nepodařilo se načíst cenu akce.");
+    }
+
+    // Postgres numeric values can arrive as either a number or a string.
+    // Stripe expects an integer amount in the smallest currency unit (haléře).
+    const eventPrice = Number(event.price);
+    const unitAmount = Math.round(eventPrice * 100);
+
+    if (!Number.isFinite(eventPrice) || eventPrice <= 0 || unitAmount <= 0) {
+      console.error("INVALID EVENT PRICE:", { eventId, price: event.price });
+      return new Response(
+        JSON.stringify({ error: "Cena akce není platná." }),
+        {
+          status: 422,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    console.log("EVENT PRICE:", { eventId, eventPrice, unitAmount });
+
     console.log("EVENT ID:", eventId);
     console.log("USER ID:", userId);
     console.log("REGISTRATION ID:", registrationId);
@@ -47,7 +91,7 @@ Deno.serve(async (req) => {
             product_data: {
               name: "Rezervace seznamovací akce",
             },
-            unit_amount: 20000,
+            unit_amount: unitAmount,
           },
           quantity: 1,
         },
