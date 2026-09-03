@@ -156,7 +156,7 @@ Deno.serve(async (req: Request) => {
       Kód uživatele: ${user.user_code}
 
       Akce: ${eventDetails.name}
-      Datum: ${eventDetails.event_date}
+      Datum: ${new Date(eventDetails.event_date).toLocaleDateString('cs-CZ')}
       Čas: ${eventDetails.event_time}
       Místo: ${eventDetails.location}
 

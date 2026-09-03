@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             age_max,
             capacity_m,
             capacity_f,
+            capacity_m_f,
             event_date,
             event_time,
             location,
@@ -247,25 +248,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
-                const sameGenderRegistrations = registrations.filter(
-                    registration =>
-                        registration.users &&
-                        registration.users.gender === registrationData.gender
-                );
+                const sharedCapacity = Number(eventData.capacity_m_f) || 0;
+                console.log("SHARED CAPACITY1:", sharedCapacity);
 
-                const capacity = registrationData.gender === "Muž"
-                    ? eventData.capacity_m
-                    : eventData.capacity_f;
+                // Přátelská akce má jednu společnou kapacitu bez rozlišení pohlaví.
+                if (sharedCapacity > 0) {
+                    console.log("SHARED CAPACITY2:", sharedCapacity);
+                    console.log("REGISTRATION COUNT:", registrations.length);
 
-                console.log("SAME GENDER:", sameGenderRegistrations);
-                console.log("CAPACITY:", capacity);
-                console.log("COUNT:", sameGenderRegistrations.length);
-
-                if (sameGenderRegistrations.length >= capacity) {
-                    alert(
-                        `Kapacita pro pohlaví ${registrationData.gender.toLowerCase()} na této akci je již naplněná. Přihlaste se na jinou akci nebo se zaregistrujte jako zájemce o tuto akci v budoucnu.`
+                    if (registrations.length >= sharedCapacity) {
+                        alert(
+                            "Kapacita této akce je již naplněná. Přihlaste se na jinou akci nebo se zaregistrujte jako zájemce o tuto akci v budoucnu."
+                        );
+                        return;
+                    }
+                } else {
+                    // Seznamovací akce: kapacita se hlídá zvlášť pro muže a ženy.
+                    const sameGenderRegistrations = registrations.filter(
+                        registration =>
+                            registration.users &&
+                            registration.users.gender === registrationData.gender
                     );
-                    return;
+
+                    const capacity = registrationData.gender === "Muž"
+                        ? eventData.capacity_m
+                        : eventData.capacity_f;
+
+                    console.log("SAME GENDER:", sameGenderRegistrations);
+                    console.log("CAPACITY:", capacity);
+                    console.log("COUNT:", sameGenderRegistrations.length);
+
+                    if (sameGenderRegistrations.length >= capacity) {
+                        alert(
+                            `Kapacita pro pohlaví ${registrationData.gender.toLowerCase()} na této akci je již naplněná. Přihlaste se na jinou akci nebo se zaregistrujte jako zájemce o tuto akci v budoucnu.`
+                        );
+                        return;
+                    }
                 }
             }
 
@@ -277,9 +295,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const { data: existingUser, error: findUserError } =
                 await supabaseClient
-                    .from('users')
-                    .select('id')
-                    .eq('email', registrationData.email)
+                    .rpc('find_user_by_email', {
+                        user_email: registrationData.email
+                    })
                     .maybeSingle();
 
             console.log("EMAIL HLEDÁNÍ:", registrationData.email);
@@ -296,15 +314,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 console.log("EXISTUJÍCÍ UŽIVATEL:", existingUser.id);
 
+                if (existingUser.gender !== registrationData.gender) {
+                    alert(
+                        "Tento e-mail už byl zaregistrovaný pod jiným pohlavím. Chcete-li pohlaví změnit, napište nám prosím přes kontaktní formulář."
+                    );
+                    form.dataset.submitting = 'false';
+                    return;
+                }
+
                 // Aktualizujeme údaje existujícího uživatele
-                const result = await supabaseClient
-                    .from('users')
-                    .update({
-                        nickname: registrationData.nickname,
-                        age: registrationData.age,
-                        gender: registrationData.gender
-                    })
-                    .eq('id', existingUser.id);
+                const { error } = await supabaseClient.rpc(
+                    'update_user_registration',
+                    {
+                        user_id: existingUser.id,
+                        new_nickname: registrationData.nickname,
+                        new_age: registrationData.age
+                    }
+                );
+
+                const result = { error };
 
                 user = {
                     id: existingUser.id
@@ -327,9 +355,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         phone: registrationData.phone,
                         gender: registrationData.gender,
                         user_code: generateUserCode()
-                    })
-                    .select('id')
-                    .single();
+                    });
 
                 user = result.data;
                 userError = result.error;
@@ -402,11 +428,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
-                alert(
-                    "Děkujeme! Zájem o budoucí akci byl uložen."
+                sessionStorage.setItem(
+                    'registrationDetails',
+                    JSON.stringify(registrationData)
                 );
 
-                window.location.href = 'index.html';
+                sessionStorage.setItem(
+                    'paymentUserId',
+                    user.id
+                );
+
+                window.location.href = 'review.html';
 
                 return;
             }
@@ -414,7 +446,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
             // 3) vytvoření rezervace
-            
+
 
 
             // uložení pro review stránku

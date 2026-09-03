@@ -56,26 +56,21 @@ window.addEventListener('DOMContentLoaded', event => {
             await supabaseClient
                 .from('events')
                 .select(`
-                id,
-                event_date,
-                event_time,
-                age_min,
-                age_max,
-                capacity_m,
-                capacity_f,
-                price,
-                registrations (
-                    user_id,
-                    users (
-                        gender
-                    )
-                ),
-                event_categories (
                     id,
-                    name,
-                    image_main
-                )
-            `)
+                    event_date,
+                    event_time,
+                    age_min,
+                    age_max,
+                    capacity_m,
+                    capacity_f,
+                    capacity_m_f,
+                    price,
+                    event_categories (
+                        id,
+                        name,
+                        image_main
+                    )
+                `)
                 .gte('event_date', new Date().toISOString().split('T')[0])
                 .order('event_date', { ascending: true })
                 .order('event_time', { ascending: true })
@@ -107,16 +102,17 @@ window.addEventListener('DOMContentLoaded', event => {
 
             const time = event.event_time.slice(0, 5);
 
-            const occupied_m = event.registrations?.filter(
-                registration => registration.users?.gender === "Muž"
-            ).length || 0;
+            const { data: genderCounts, error: genderError } =
+                await supabaseClient.rpc('get_event_gender_counts', {
+                    event_id_input: event.id
+                });
 
-            const occupied_f = event.registrations?.filter(
-                registration => registration.users?.gender === "Žena"
-            ).length || 0;
+            const occupied_m = Number(genderCounts?.[0]?.occupied_m || 0);
+            const occupied_f = Number(genderCounts?.[0]?.occupied_f || 0);
 
             const capacity_m = event.capacity_m;
             const capacity_f = event.capacity_f;
+            const capacity_m_f = event.capacity_m_f
 
             const price = event.price;
 
@@ -135,7 +131,12 @@ window.addEventListener('DOMContentLoaded', event => {
                     &nbsp;&nbsp;
                     ${category.name}
                     &nbsp;&nbsp;
-                    <span>♂ ${occupied_m} / ${capacity_m} &nbsp;&nbsp; ♀ ${occupied_f} / ${capacity_f}</span>
+                    <span>
+                    ${capacity_m_f > 0
+                    ? `♂♀ ${occupied_m + occupied_f} / ${capacity_m_f}`
+                    : `♂ ${occupied_m} / ${capacity_m} &nbsp;&nbsp; ♀ ${occupied_f} / ${capacity_f}`
+                }
+                    </span>
                 </div>
 
                 <a
