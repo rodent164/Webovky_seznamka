@@ -11463,3 +11463,8 @@ section#kontakt form#contactForm :-ms-input-placeholder {
     justify-content: space-between !important;
     width: 100% !important;
 }
+
+.gdpr-details {
+    margin-left: 30px;
+    margin-right: 30px;
+}

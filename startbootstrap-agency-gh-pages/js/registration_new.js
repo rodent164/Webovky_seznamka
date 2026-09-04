@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const isFutureInterest = futureInterest === 'true';
 
+    console.log("FUTURE INTEREST PARAM:", futureInterest);
+    console.log("IS FUTURE INTEREST:", isFutureInterest);
+
     const eventDetailsInfo = document.querySelector('.event-details-info');
 
     if (eventDetailsInfo && isFutureInterest) {
@@ -207,15 +210,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 age: Number(form.elements.age.value),
                 email: form.elements.email.value.trim(),
                 phone: form.elements.phone.value.trim(),
+                allow_email_info: form.elements.marketing.checked,
                 event_id: form.elements.event_id.value
             };
 
             console.log("Odesílám:", registrationData);
 
-            // let minAge = eventData.age_min;
-            // let maxAge = eventData.age_max;
+
+            // ============================================================
+            // 1) KONTROLA VĚKU
+            // ============================================================
 
             if (!isFutureInterest) {
+
                 if (
                     registrationData.age < eventData.age_min ||
                     registrationData.age > eventData.age_max
@@ -227,69 +234,47 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
+
+            // ============================================================
+            // 2) KONTROLA KAPACITY
+            // ============================================================
+
             if (!isFutureInterest) {
 
                 console.log("START CAPACITY CHECK");
                 console.log("EVENT:", registrationData.event_id);
                 console.log("GENDER:", registrationData.gender);
 
-                const { data: registrations, error: countError } =
-                    await supabaseClient
-                        .from('registrations')
-                        .select('user_id, users(gender)')
-                        .eq('event_id', registrationData.event_id);
+                const { data: hasCapacity, error: capacityError } =
+                    await supabaseClient.rpc('check_event_capacity', {
+                        event_id_input: registrationData.event_id,
+                        gender_input: registrationData.gender
+                    });
 
-                console.log("EVENT REGISTRATIONS:", registrations);
-                console.log("CAPACITY ERROR:", countError);
+                console.log("HAS CAPACITY:", hasCapacity);
+                console.log("CAPACITY ERROR:", capacityError);
 
-                if (countError) {
-                    console.error("COUNT ERROR:", countError);
+                if (capacityError) {
+                    console.error("CAPACITY ERROR:", capacityError);
                     alert("Nepodařilo se ověřit kapacitu akce.");
                     return;
                 }
 
-                const sharedCapacity = Number(eventData.capacity_m_f) || 0;
-                console.log("SHARED CAPACITY1:", sharedCapacity);
-
-                // Přátelská akce má jednu společnou kapacitu bez rozlišení pohlaví.
-                if (sharedCapacity > 0) {
-                    console.log("SHARED CAPACITY2:", sharedCapacity);
-                    console.log("REGISTRATION COUNT:", registrations.length);
-
-                    if (registrations.length >= sharedCapacity) {
-                        alert(
-                            "Kapacita této akce je již naplněná. Přihlaste se na jinou akci nebo se zaregistrujte jako zájemce o tuto akci v budoucnu."
-                        );
-                        return;
-                    }
-                } else {
-                    // Seznamovací akce: kapacita se hlídá zvlášť pro muže a ženy.
-                    const sameGenderRegistrations = registrations.filter(
-                        registration =>
-                            registration.users &&
-                            registration.users.gender === registrationData.gender
+                if (!hasCapacity) {
+                    alert(
+                        "Kapacita této akce je již naplněná. Přihlaste se na jinou akci nebo se zaregistrujte jako zájemce o tuto akci v budoucnu."
                     );
-
-                    const capacity = registrationData.gender === "Muž"
-                        ? eventData.capacity_m
-                        : eventData.capacity_f;
-
-                    console.log("SAME GENDER:", sameGenderRegistrations);
-                    console.log("CAPACITY:", capacity);
-                    console.log("COUNT:", sameGenderRegistrations.length);
-
-                    if (sameGenderRegistrations.length >= capacity) {
-                        alert(
-                            `Kapacita pro pohlaví ${registrationData.gender.toLowerCase()} na této akci je již naplněná. Přihlaste se na jinou akci nebo se zaregistrujte jako zájemce o tuto akci v budoucnu.`
-                        );
-                        return;
-                    }
+                    return;
                 }
+
+
             }
 
 
+            // ============================================================
+            // 3) NAJDEME NEBO VYTVOŘÍME UŽIVATELE
+            // ============================================================
 
-            // 1) najdeme nebo vytvoříme uživatele
             let user;
             let userError;
 
@@ -305,66 +290,86 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log("FIND USER ERROR:", findUserError);
 
             if (findUserError) {
+
                 console.error("FIND USER ERROR:", findUserError);
+
                 alert("Nepodařilo se ověřit uživatele.");
+
                 return;
             }
+
 
             if (existingUser) {
 
                 console.log("EXISTUJÍCÍ UŽIVATEL:", existingUser.id);
 
                 if (existingUser.gender !== registrationData.gender) {
+
                     alert(
                         "Tento e-mail už byl zaregistrovaný pod jiným pohlavím. Chcete-li pohlaví změnit, napište nám prosím přes kontaktní formulář."
                     );
-                    form.dataset.submitting = 'false';
+
                     return;
                 }
 
-                // Aktualizujeme údaje existujícího uživatele
-                const { error } = await supabaseClient.rpc(
-                    'update_user_registration',
-                    {
-                        user_id: existingUser.id,
-                        new_nickname: registrationData.nickname,
-                        new_age: registrationData.age
-                    }
-                );
 
-                const result = { error };
+                // Aktualizujeme údaje existujícího uživatele
+                const { error } =
+                    await supabaseClient.rpc(
+                        'update_user_registration',
+                        {
+                            user_id: existingUser.id,
+                            new_nickname: registrationData.nickname,
+                            new_age: registrationData.age,
+                            new_allow_email_info: registrationData.allow_email_info,
+                        }
+                    );
 
                 user = {
                     id: existingUser.id
                 };
 
-                userError = result.error;
+                userError = error;
 
 
             } else {
+
                 console.log("JDU DO INSERTU NOVÉHO UŽIVATELE");
-                // Uživatel ještě neexistuje → vytvoříme ho
                 console.log("PHONE Z FORMULÁŘE:", registrationData.phone);
 
-                const result = await supabaseClient
-                    .from('users')
-                    .insert({
-                        nickname: registrationData.nickname,
-                        age: registrationData.age,
-                        email: registrationData.email,
-                        phone: registrationData.phone,
-                        gender: registrationData.gender,
-                        user_code: generateUserCode()
+                const { data: newUserId, error: createUserError } =
+                    await supabaseClient.rpc('create_user_registration', {
+                        new_nickname: registrationData.nickname,
+                        new_age: registrationData.age,
+                        new_email: registrationData.email,
+                        new_phone: registrationData.phone,
+                        new_gender: registrationData.gender,
+                        new_allow_email_info: registrationData.allow_email_info,
+                        new_user_code: generateUserCode()
                     });
 
-                user = result.data;
-                userError = result.error;
+                console.log("NEW USER ID:", newUserId);
+                console.log("CREATE USER ERROR:", createUserError);
+
+                if (createUserError || !newUserId) {
+                    console.error("CREATE USER FAILED:", createUserError);
+                    throw new Error("Nepodařilo se vytvořit uživatele.");
+                }
+
+                user = {
+                    id: newUserId
+                };
+
+                userError = null;
             }
+
 
             console.log("USER:", user);
             console.log("USER ERROR:", userError);
 
+
             if (userError) {
+
                 console.error("USER ERROR OBJECT:", userError);
 
                 alert(
@@ -374,9 +379,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 return;
             }
+            console.log("=== PŘED FUTURE INTEREST BLOKEM ===");
+            console.log("isFutureInterest:", isFutureInterest);
+            console.log("userError:", userError);
+            console.log("categoryId:", categoryId);
 
 
-            // 2) budoucí zájem
+            // ============================================================
+            // 4) BUDOUCÍ ZÁJEM
+            // ============================================================
+
             if (isFutureInterest) {
 
                 const { data: existingInterest, error: interestCheckError } =
@@ -387,7 +399,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         .eq('category_id', Number(categoryId))
                         .maybeSingle();
 
+
                 if (interestCheckError) {
+
                     console.error(
                         "FUTURE INTEREST CHECK ERROR:",
                         interestCheckError
@@ -400,10 +414,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
+
                 if (existingInterest) {
-                    alert("O tuto akci jste již projevil/a zájem.");
+
+                    alert(
+                        "O tuto akci jste již projevil/a zájem."
+                    );
+
                     return;
                 }
+
 
                 const { error: futureInterestError } =
                     await supabaseClient
@@ -414,7 +434,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                             status: 'interested'
                         });
 
+
                 if (futureInterestError) {
+
                     console.error(
                         "FUTURE INTEREST ERROR:",
                         futureInterestError
@@ -428,6 +450,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
+
+                // Uložíme údaje pro review stránku
                 sessionStorage.setItem(
                     'registrationDetails',
                     JSON.stringify(registrationData)
@@ -438,18 +462,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     user.id
                 );
 
-                window.location.href = 'review.html';
+                sessionStorage.setItem(
+                    'futureInterest',
+                    'true'
+                );
+                window.location.href = 'future-review.html';
 
                 return;
             }
 
 
+            // ============================================================
+            // 5) NORMÁLNÍ REGISTRACE
+            // ============================================================
 
-            // 3) vytvoření rezervace
-
-
-
-            // uložení pro review stránku
             sessionStorage.setItem(
                 'registrationDetails',
                 JSON.stringify(registrationData)
@@ -460,9 +486,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 user.id
             );
 
-            //await new Promise(resolve => setTimeout(resolve, 5000)); // SMAZAT!!!
-            //alert("TEĎ SE PŘESMĚRUJI NA REVIEW");
+            sessionStorage.removeItem('futureInterest');
+
             window.location.href = 'review.html';
+
 
         } finally {
 
@@ -470,4 +497,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
     });
+
+
 });

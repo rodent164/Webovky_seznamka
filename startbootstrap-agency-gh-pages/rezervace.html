@@ -106,17 +106,22 @@
                     </div>
                 </div>
 
-                <div class="form-check mb-4">
-                    <input class="form-check-input" id="privacy" name="privacy" type="checkbox" required />
-                    <label class="form-check-label" for="privacy">
-                        Souhlasím se zpracováním osobních údajů pro účely organizace akce.
-                    </label>
+                <!-- Informace o zpracování osobních údajů pro akci -->
+                <p class="small text-muted mb-3">
+                    Odesláním formuláře berete na vědomí, že Vaše osobní údaje zpracováváme za účelem organizace a
+                    realizace akce. Více informací o zpracování osobních údajů a Vašich právech naleznete v našich
+                    <a href="gdpr.html">Zásadách ochrany osobních údajů</a>.
+                </p>
 
-                    <div class="invalid-feedback">
-                        Pro pokračování je nutný souhlas.
-                    </div>
+                <!-- Nepovinný checkbox pro e-maily -->
+                <div class="form-check mb-4">
+                    <input class="form-check-input" id="marketing" name="marketing" type="checkbox" />
+                    <label class="form-check-label" for="marketing">
+                        Chci dostávat e-maily s informacemi o dalších chystaných akcích. (Důležité pro registraci na budoucí akce!)
+                    </label>
                 </div>
 
+                <!-- Tlačítko -->
                 <button class="btn btn-primary btn-xl text-uppercase w-100" type="submit">
                     Zkontrolovat údaje
                 </button>
