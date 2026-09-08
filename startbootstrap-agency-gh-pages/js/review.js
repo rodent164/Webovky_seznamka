@@ -50,37 +50,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let registration;
             let registrationError;
+            
+            const { data: newRegistrationId, error: createRegistrationError } =
+                await supabaseClient.rpc(
+                    'create_registration',
+                    {
+                        p_user_id: paymentUserId,
+                        p_event_id: details.event_id
+                    }
+                );
 
-            const { data: existingRegistration, error: existingRegistrationError } =
-                await supabaseClient
-                    .from('registrations')
-                    .select('id, status')
-                    .eq('user_id', paymentUserId)
-                    .eq('event_id', details.event_id)
-                    .maybeSingle();
+            registration = newRegistrationId
+                ? {
+                    id: newRegistrationId,
+                    status: 'reserved'
+                }
+                : null;
 
-            if (existingRegistrationError) {
-                throw new Error("Nepodařilo se ověřit existující rezervaci.");
-            }
+            registrationError = createRegistrationError;
 
-            if (existingRegistration) {
-                console.log("EXISTUJÍCÍ REGISTRACE:", existingRegistration);
-
-                registration = existingRegistration;
-            } else {
-                const result = await supabaseClient
-                    .from('registrations')
-                    .insert({
-                        user_id: paymentUserId,
-                        event_id: details.event_id,
-                        status: 'reserved'
-                    })
-                    .select('id, status')
-                    .single();
-
-                registration = result.data;
-                registrationError = result.error;
-            }
 
             if (registrationError) {
                 console.error("REGISTRATION ERROR:", registrationError);
@@ -92,9 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error("Nepodařilo se vytvořit rezervaci.");
             }
 
-            console.log("REGISTRATION CREATED:", registration);
-            console.log("REGISTRATION OBJECT BEFORE STRIPE:", registration);
-            console.log("REGISTRATION ID BEFORE STRIPE:", registration.id);
 
             const { data, error } =
                 await supabaseClient.functions.invoke(

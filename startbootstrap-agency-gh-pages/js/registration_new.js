@@ -204,6 +204,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
+            if (isFutureInterest && !form.elements.marketing.checked) {
+                alert(
+                    "Pro registraci jako zájemce o budoucí akci je nutné souhlasit s přijímáním e-mailů s informacemi o dalších chystaných akcích."
+                );
+                return;
+            }
+
             const registrationData = {
                 nickname: form.elements.nickname.value.trim(),
                 gender: selectedGender.value,
@@ -392,12 +399,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (isFutureInterest) {
 
                 const { data: existingInterest, error: interestCheckError } =
-                    await supabaseClient
-                        .from('future_event_interests')
-                        .select('id')
-                        .eq('user_id', user.id)
-                        .eq('category_id', Number(categoryId))
-                        .maybeSingle();
+                    await supabaseClient.rpc(
+                        'check_future_interest',
+                        {
+                            p_user_id: user.id,
+                            p_category_id: Number(categoryId)
+                        }
+                    );
 
 
                 if (interestCheckError) {

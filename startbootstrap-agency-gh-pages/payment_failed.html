@@ -75,11 +75,10 @@
 
             console.log("REGISTRATION:", data);
 
-            const { data: userData, error: userError } = await supabaseClient
-                .from("users")
-                .select("email")
-                .eq("id", data.user_id)
-                .single();
+            const { data: userData, error: userError } =
+                await supabaseClient.rpc('get_user_email', {
+                    user_id_input: data.user_id
+                });
 
             if (userError) {
                 console.error("USER ERROR:", userError);
