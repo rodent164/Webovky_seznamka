@@ -71,7 +71,7 @@
 
             const { data: userData, error: userError } =
                 await supabaseClient.rpc('get_user_email', {
-                    user_id_input: data.user_id
+                    user_id_input: data[0].user_id
                 });
 
             if (userError) {
@@ -87,7 +87,7 @@
                             eventId: data.event_id,
                             userId: data.user_id,
                             registrationId: registrationId,
-                            email: userData.email
+                            email: userData
                         }
                     }
                 );
