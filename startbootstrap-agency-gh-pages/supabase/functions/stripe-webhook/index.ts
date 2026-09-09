@@ -10,7 +10,6 @@ const stripe = new Stripe(
 const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
 
 Deno.serve(async (req: Request) => {
-  console.log("STRIPE WEBHOOK RECEIVED");
 
   const signature = req.headers.get("stripe-signature");
 
@@ -42,14 +41,11 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  console.log("STRIPE EVENT:", event.type);
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
     const registrationId = session.metadata?.registrationId;
-
-    console.log("REGISTRATION ID:", registrationId);
 
     if (!registrationId) {
       console.error("MISSING REGISTRATION ID");
@@ -91,11 +87,6 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    console.log(
-      "REGISTRATION UPDATED TO PAID:",
-      registrationId
-    );
-
     const registrationResponse = await fetch(
       `${supabaseUrl}/rest/v1/registrations?id=eq.${registrationId}&select=user_id,event_id`,
       {
@@ -108,7 +99,6 @@ Deno.serve(async (req: Request) => {
 
     const registrationData = await registrationResponse.json();
 
-    console.log("REGISTRATION DATA:", registrationData);
     const userResponse = await fetch(
       `${supabaseUrl}/rest/v1/users?id=eq.${registrationData[0].user_id}&select=nickname,email,user_code`,
       {
@@ -121,8 +111,6 @@ Deno.serve(async (req: Request) => {
 
     const userData = await userResponse.json();
 
-    console.log("USER DATA:", userData);
-
     const eventResponse = await fetch(
       `${supabaseUrl}/rest/v1/events?id=eq.${registrationData[0].event_id}&select=name,event_date,event_time,location,category_id,event_categories(name,more_info)`,
       {
@@ -134,8 +122,6 @@ Deno.serve(async (req: Request) => {
     );
 
     const eventData = await eventResponse.json();
-
-    console.log("EVENT DATA:", eventData);
 
     // ==========================================
     // PŘÍPRAVA POTVRZOVACÍHO E-MAILU
@@ -163,8 +149,6 @@ Deno.serve(async (req: Request) => {
       Informace o akci:
       ${eventDetails.event_categories?.more_info || ""}
       `;
-
-    console.log("EMAIL TEXT:", emailText);
 
     if (!user || !eventDetails) {
       console.error("MISSING USER OR EVENT DATA");
@@ -194,10 +178,6 @@ Deno.serve(async (req: Request) => {
       const participantEmailResult =
         await participantEmailResponse.text();
 
-      console.log(
-        "PARTICIPANT RESEND RESPONSE:",
-        participantEmailResult
-      );
     }
         // ==========================================
     // E-MAIL ORGANIZÁTOROVI PŘES RESEND
@@ -222,11 +202,6 @@ Deno.serve(async (req: Request) => {
 
     const organizerEmailResult =
       await organizerEmailResponse.text();
-
-    console.log(
-      "ORGANIZER RESEND RESPONSE:",
-      organizerEmailResult
-    );
   }
 
   return new Response(

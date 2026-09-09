@@ -84,12 +84,6 @@ window.addEventListener('DOMContentLoaded', event => {
             return;
         }
 
-        console.log('NEJBLIŽŠÍ AKCE:', events);
-        console.log("PRVNÍ AKCE:", events[0]);
-        console.log("KAPACITA MUŽI:", events[0]?.capacity_m);
-        console.log("KAPACITA ŽENY:", events[0]?.capacity_f);
-        console.log("REGISTRACE:", events[0]?.registrations);
-
         container.innerHTML = '';
 
         for (const event of events) {
@@ -184,8 +178,6 @@ window.addEventListener('DOMContentLoaded', event => {
             console.error("CHYBA PŘI NAČÍTÁNÍ KATEGORIÍ:", categoriesError);
             return;
         }
-
-        console.log("NAČTENÉ KATEGORIE:", categories);
 
         const eventsContainer =
             document.querySelector('#events-container');
@@ -353,22 +345,10 @@ window.addEventListener('DOMContentLoaded', event => {
             modal: document.getElementById(`event-modal-${category.id}`)
         }));
 
-        // console.log(
-        //     "NALEZENÉ MODALY:",
-        //     [...modals].map(modal => ({
-        //         id: modal.id,
-        //         eventName: modal.dataset.eventName
-        //     }))
-        // );
-
 
         for (const { category, modal } of modals) {
 
             const eventName = category.name;
-
-            console.log("================================");
-            console.log("MODAL:", modal.id);
-            console.log("EVENT NAME:", eventName);
 
 
             // --------------------------------------------------
@@ -524,10 +504,6 @@ window.addEventListener('DOMContentLoaded', event => {
 
             if (events.length === 0) {
 
-                console.log(
-                    `Akce "${eventName}" zatím nemá žádný termín.`
-                );
-
                 if (ageOptions) {
                     ageOptions.innerHTML =
                         '<span class="event-terms-label">Termíny</span><p class="text-muted mb-0">Termín této akce zatím není vypsán.</p>';
@@ -606,12 +582,6 @@ window.addEventListener('DOMContentLoaded', event => {
                 ageButton.addEventListener(
                     'click',
                     async () => {
-
-                        console.log(
-                            "VYBRANÝ EVENT:",
-                            event
-                        );
-
 
                         // Practical information
                         if (practicalInfo) {
@@ -702,71 +672,10 @@ window.addEventListener('DOMContentLoaded', event => {
 
                                     clickEvent.preventDefault();
 
-                                    console.log(
-                                        "REGISTRATION EVENT ID:",
-                                        event.id
-                                    );
-
                                     window.location.href =
                                         `rezervace.html?event_id=${event.id}`;
                                 };
                         }
-
-
-                        // --------------------------------------------------
-                        // Count registrations
-                        // --------------------------------------------------
-
-                        const {
-                            data: registrations,
-                            error: registrationError
-                        } = await supabaseClient
-                            .from('registrations')
-                            .select('user_id, users(gender)')
-                            .eq('event_id', event.id);
-
-
-                        if (registrationError) {
-
-                            console.error(
-                                "REGISTRATION ERROR:",
-                                registrationError
-                            );
-
-                            return;
-                        }
-
-
-                        console.log(
-                            "COUNTING EVENT:",
-                            event.id
-                        );
-
-                        console.log(
-                            "REGISTRATIONS:",
-                            registrations
-                        );
-
-
-                        let men = 0;
-                        let women = 0;
-
-
-                        for (const registration of registrations) {
-
-                            if (
-                                registration.users?.gender === "Muž"
-                            ) {
-                                men++;
-                            }
-
-                            if (
-                                registration.users?.gender === "Žena"
-                            ) {
-                                women++;
-                            }
-                        }
-
 
                         // --------------------------------------------------
                         // Display counts
@@ -780,12 +689,11 @@ window.addEventListener('DOMContentLoaded', event => {
 
 
                         if (menElement) {
-                            menElement.textContent = men;
+                            menElement.textContent = occupied_m;
                         }
 
-
                         if (womenElement) {
-                            womenElement.textContent = women;
+                            womenElement.textContent = occupied_f;
                         }
 
 

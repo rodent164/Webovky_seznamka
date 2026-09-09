@@ -55,25 +55,19 @@
         const params = new URLSearchParams(window.location.search);
         const registrationId = params.get("registrationId");
 
-        console.log("REGISTRATION ID:", registrationId);
-
         document.getElementById("retryPayment").addEventListener("click", async () => {
 
-            console.log("RETRY PAYMENT");
-            console.log("REGISTRATION ID:", registrationId);
-
-            const { data, error } = await supabaseClient
-                .from("registrations")
-                .select("user_id, event_id")
-                .eq("id", registrationId)
-                .single();
+            const { data, error } = await supabaseClient.rpc(
+                "get_registration_for_retry",
+                {
+                    p_registration_id: registrationId
+                }
+            );
 
             if (error) {
                 console.error("REGISTRATION ERROR:", error);
                 return;
             }
-
-            console.log("REGISTRATION:", data);
 
             const { data: userData, error: userError } =
                 await supabaseClient.rpc('get_user_email', {
@@ -85,7 +79,6 @@
                 return;
             }
 
-            console.log("USER:", userData);
             const { data: checkoutData, error: checkoutError } =
                 await supabaseClient.functions.invoke(
                     "create-checkout-session",
@@ -104,7 +97,6 @@
                 return;
             }
 
-            console.log("CHECKOUT DATA:", checkoutData);
             window.location.href = checkoutData.url;
         });
     </script>

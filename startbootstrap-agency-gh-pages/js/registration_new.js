@@ -1,5 +1,5 @@
 supabaseClient.rpc('test_auth_role').then(({ data, error }) => {
-    console.log("ROLE FROM SUPABASE:", data);
+
     console.log("ROLE ERROR:", error);
 });
 
@@ -9,9 +9,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const futureInterest = new URLSearchParams(window.location.search).get('future');
 
     const isFutureInterest = futureInterest === 'true';
-
-    console.log("FUTURE INTEREST PARAM:", futureInterest);
-    console.log("IS FUTURE INTEREST:", isFutureInterest);
+    
+    if (!eventId && !isFutureInterest) {
+    return;
+}
 
     const eventDetailsInfo = document.querySelector('.event-details-info');
 
@@ -19,17 +20,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         eventDetailsInfo.style.display = 'none';
     }
 
-    console.log("IS FUTURE INTEREST:", isFutureInterest);
-    console.log("FUTURE INTEREST:", futureInterest);
-
     const eventIdInput = document.querySelector('#event_id');
 
     if (eventIdInput && eventId) {
         eventIdInput.value = eventId;
     }
-
-    console.log("EVENT ID FROM URL:", eventId);
-
 
 
     let eventData = null;
@@ -100,7 +95,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 eventData.price;
         }
 
-        console.log("EVENT AGE LIMITS:", eventData);
     }
 
     const categoryId = isFutureInterest
@@ -118,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (categoryError) {
         console.error("CATEGORY ERROR:", categoryError);
     } else {
-        console.log("CATEGORY DATA:", categoryData);
+
         const eventNameElement = document.querySelector('.registration-event-name');
         if (eventNameElement) {
             eventNameElement.textContent = categoryData.name;
@@ -131,7 +125,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const genderError = document.querySelector('.gender-error');
 
     const generateUserCode = () => {
-        console.log("generateUserCode called");
         const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         let code = '';
 
@@ -161,7 +154,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     form.addEventListener('submit', async (event) => {
 
-        console.log("SUBMIT EVENT", form.dataset.submitting);
 
         if (form.dataset.submitting === 'true') {
             return;
@@ -172,15 +164,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         form.dataset.submitting = 'true';
 
         try {
-
-            console.log("SUBMIT START");
-            console.log("FORM DATA:", {
-                nickname: form.elements.nickname.value,
-                age: form.elements.age.value,
-                email: form.elements.email.value,
-                phone: form.elements.phone.value,
-                gender: form.querySelector('input[name="gender"]:checked')?.value
-            });
 
             const selectedGender = form.querySelector(
                 'input[name="gender"]:checked'
@@ -221,8 +204,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 event_id: form.elements.event_id.value
             };
 
-            console.log("Odesílám:", registrationData);
-
 
             // ============================================================
             // 1) KONTROLA VĚKU
@@ -248,9 +229,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (!isFutureInterest) {
 
-                console.log("START CAPACITY CHECK");
-                console.log("EVENT:", registrationData.event_id);
-                console.log("GENDER:", registrationData.gender);
 
                 const { data: hasCapacity, error: capacityError } =
                     await supabaseClient.rpc('check_event_capacity', {
@@ -258,7 +236,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         gender_input: registrationData.gender
                     });
 
-                console.log("HAS CAPACITY:", hasCapacity);
                 console.log("CAPACITY ERROR:", capacityError);
 
                 if (capacityError) {
@@ -292,8 +269,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     })
                     .maybeSingle();
 
-            console.log("EMAIL HLEDÁNÍ:", registrationData.email);
-            console.log("EXISTING USER:", existingUser);
             console.log("FIND USER ERROR:", findUserError);
 
             if (findUserError) {
@@ -308,7 +283,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (existingUser) {
 
-                console.log("EXISTUJÍCÍ UŽIVATEL:", existingUser.id);
 
                 if (existingUser.gender !== registrationData.gender) {
 
@@ -341,9 +315,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             } else {
 
-                console.log("JDU DO INSERTU NOVÉHO UŽIVATELE");
-                console.log("PHONE Z FORMULÁŘE:", registrationData.phone);
-
                 const { data: newUserId, error: createUserError } =
                     await supabaseClient.rpc('create_user_registration', {
                         new_nickname: registrationData.nickname,
@@ -355,7 +326,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         new_user_code: generateUserCode()
                     });
 
-                console.log("NEW USER ID:", newUserId);
                 console.log("CREATE USER ERROR:", createUserError);
 
                 if (createUserError || !newUserId) {
@@ -370,8 +340,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 userError = null;
             }
 
-
-            console.log("USER:", user);
             console.log("USER ERROR:", userError);
 
 
@@ -386,10 +354,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 return;
             }
-            console.log("=== PŘED FUTURE INTEREST BLOKEM ===");
-            console.log("isFutureInterest:", isFutureInterest);
+
             console.log("userError:", userError);
-            console.log("categoryId:", categoryId);
 
 
             // ============================================================

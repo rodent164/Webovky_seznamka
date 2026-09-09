@@ -17,8 +17,6 @@ async function startStripePayment(eventId, userId) {
         return;
     }
 
-    console.log("STRIPE CHECKOUT URL:", data.url);
-
     window.location.href = data.url;
 }
 

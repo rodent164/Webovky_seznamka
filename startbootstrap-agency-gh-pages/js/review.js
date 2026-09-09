@@ -1,8 +1,6 @@
 
 const paymentUserId = sessionStorage.getItem('paymentUserId');
 
-console.log("PAYMENT USER ID:", paymentUserId);
-
 document.addEventListener('DOMContentLoaded', () => {
     const savedRegistration = sessionStorage.getItem('registrationDetails');
     let details;
@@ -43,10 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const details = JSON.parse(
                 sessionStorage.getItem('registrationDetails')
             );
-
-            console.log("USER ID FOR INSERT:", paymentUserId);
-            console.log("EVENT ID FOR INSERT:", details.event_id);
-            //alert("JDU VYTVÁŘET REGISTRACI");
 
             let registration;
             let registrationError;
@@ -93,12 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 );
-            console.log("SENDING TO STRIPE:", {
-                eventId: details.event_id,
-                userId: paymentUserId,
-                registrationId: registration.id,
-                email: details.email
-            });
 
             if (error || !data?.url) {
                 console.error("STRIPE ERROR:", error);

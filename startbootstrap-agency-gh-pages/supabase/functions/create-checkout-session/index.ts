@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
     const unitAmount = Math.round(eventPrice * 100);
 
     if (!Number.isFinite(eventPrice) || eventPrice <= 0 || unitAmount <= 0) {
-      console.error("INVALID EVENT PRICE:", { eventId, price: event.price });
+      console.error("INVALID EVENT PRICE:", {price: event.price });
       return new Response(
         JSON.stringify({ error: "Cena akce není platná." }),
         {
@@ -72,13 +72,6 @@ Deno.serve(async (req) => {
         },
       );
     }
-
-    console.log("EVENT PRICE:", { eventId, eventPrice, unitAmount });
-
-    console.log("EVENT ID:", eventId);
-    console.log("USER ID:", userId);
-    console.log("REGISTRATION ID:", registrationId);
-    console.log("EMAIL:", email);
 
     const siteUrl = Deno.env.get("SITE_URL")!;
     const session = await stripe.checkout.sessions.create({
