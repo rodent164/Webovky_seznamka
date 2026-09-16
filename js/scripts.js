@@ -506,11 +506,13 @@ window.addEventListener('DOMContentLoaded', event => {
 
                 if (ageOptions) {
                     ageOptions.innerHTML =
-                        '<span class="event-terms-label">Termíny</span><p class="text-muted mb-0">Termín této akce zatím není vypsán.</p>';
+                        '<span class="event-terms-label">Termíny</span><p class="text-muted mb-0">Termín této akce zatím není vypsán. \n Zaregistrujte se pro informace o chystaných akcích.</p>';
+
                 }
                 if (modalAgeOptions) {
                     modalAgeOptions.innerHTML =
-                        '<span class="event-terms-label">Termíny</span><p class="text-muted mb-0">Termín této akce zatím není vypsán.</p>';
+                        '<span class="event-terms-label">Termíny</span><p class="text-muted mb-0">Termín této akce zatím není vypsán. \n Zaregistrujte se pro informace o chystaných akcích.</p>';
+
                 }
 
                 if (practicalInfo) {
