@@ -4,10 +4,11 @@ __pycache__/
 .DS_Store
 ENV/
 .env
-startbootstrap-agency-gh-pages/assets/img/portfolio/sachy.jpeg
-startbootstrap-agency-gh-pages/assets/img/portfolio/deskovky1.jpg
-startbootstrap-agency-gh-pages/supabase_test.js
-startbootstrap-agency-gh-pages/supabase_test.html
-/startbootstrap-agency-gh-pages/assets/img/portfolio
-/startbootstrap-agency-gh-pages/assets/img/other_imgs
-startbootstrap-agency-gh-pages/assets/img/background_new copy.png
+assets/img/portfolio/sachy.jpeg
+assets/img/portfolio/deskovky1.jpg
+supabase_test.js
+supabase_test.html
+assets/img/portfolio
+assets/img/other_imgs
+assets/img/background_new copy.png
+assets/img/loga.jpg
