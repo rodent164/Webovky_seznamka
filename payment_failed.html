@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Platba nebyla dokončena" />
+    <title>Platba nebyla dokončena | Seznamovací akce Plzeň</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" type="text/css" />
+    <link href="css/styles.css" rel="stylesheet" />
+</head>
+
+<body class="registration-page">
+
+    <main class="registration-main">
+        <section class="registration-card" aria-labelledby="payment-failed-title">
+
+            <div class="text-center">
+
+                <h1 id="payment-failed-title" class="section-heading text-uppercase">
+                    Platba nebyla dokončena
+                </h1>
+
+                <p class="registration-intro">
+                    Platbu se nepodařilo dokončit.
+                </p>
+
+                <p>
+                    Vaše rezervace zatím zůstává zachována.
+                    Můžete se pokusit zaplatit znovu.
+                </p>
+
+                <div class="d-grid gap-3 mt-4">
+                    <button id="retryPayment" class="btn btn-primary btn-xl text-uppercase" type="button">
+                        Zkusit zaplatit znovu
+                    </button>
+
+                    <a class="btn btn-outline-secondary text-uppercase" href="index.html">
+                        Zpět na hlavní stránku
+                    </a>
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+
+    <script>
+
+        const params = new URLSearchParams(window.location.search);
+        const registrationId = params.get("registrationId");
+
+        document.getElementById("retryPayment").addEventListener("click", async () => {
+
+            const { data, error } = await supabaseClient.rpc(
+                "get_registration_for_retry",
+                {
+                    p_registration_id: registrationId
+                }
+            );
+
+            if (error) {
+                console.error("REGISTRATION ERROR:", error);
+                return;
+            }
+
+            const { data: userData, error: userError } =
+                await supabaseClient.rpc('get_user_email', {
+                    user_id_input: data[0].user_id
+                });
+
+            if (userError) {
+                console.error("USER ERROR:", userError);
+                return;
+            }
+
+            const { data: checkoutData, error: checkoutError } =
+                await supabaseClient.functions.invoke(
+                    "create-checkout-session",
+                    {
+                        body: {
+                            eventId: data.event_id,
+                            userId: data.user_id,
+                            registrationId: registrationId,
+                            email: userData
+                        }
+                    }
+                );
+
+            if (checkoutError) {
+                console.error("CHECKOUT ERROR:", checkoutError);
+                return;
+            }
+
+            window.location.href = checkoutData.url;
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,138 @@
+<!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> -->
+<!-- <script src="js/registration_new.js"></script> -->
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Registrace na seznamovací akci v Plzni" />
+    <title>Registrace | Seznamovací akce Plzeň</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" type="text/css" />
+    <link href="css/styles.css" rel="stylesheet" />
+</head>
+
+<body class="registration-page">
+    <main class="registration-main">
+        <a class="registration-back" href="index.html">&larr; Zpět na hlavní stránku</a>
+        <section class="registration-card" aria-labelledby="registration-title">
+            <div class="text-center">
+                <h1 id="registration-title" class="section-heading text-uppercase">Registrace</h1>
+                <h5 class="text-center">
+                    <span class="registration-event-name">0</span>
+                </h5>
+                <p class="registration-intro">Vyplňte své údaje a rezervujte si místo na naší akci.</p>
+            </div>
+
+            <div class="event-registration-info">
+
+                <p class="event-details-info">
+                    Akce pro <span class="minAge"></span><span class="age-separator">-</span><span
+                        class="maxAge"></span> let<br>
+                    <span class="eventDate">0</span> od <span class="eventTime">0</span><br>
+                    <span class="eventLocation">0</span><br>
+                    <span class="eventPrice">0</span> Kč<br>
+                </p>
+            </div>
+            <form id="registrationForm" novalidate>
+
+                <input type="hidden" id="event_id" name="event_id">
+
+                <div class="mb-4">
+                    <label class="form-label" for="nickname">Přezdívka</label>
+                    <input class="form-control" id="nickname" name="nickname" type="text" maxlength="50" required
+                        aria-describedby="nicknameHelp" />
+                    <div id="nicknameHelp" class="form-text">
+                        Přezdívka bude použita při organizaci akce.
+                    </div>
+                    <div class="invalid-feedback">
+                        Zadejte prosím přezdívku.
+                    </div>
+                </div>
+
+                <fieldset class="mb-4">
+                    <legend class="form-label">Pohlaví</legend>
+
+                    <div class="d-flex gap-4">
+                        <div class="form-check">
+                            <input class="form-check-input" id="male" name="gender" type="radio" value="Muž" required />
+                            <label class="form-check-label" for="male">
+                                Muž
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" id="female" name="gender" type="radio" value="Žena"
+                                required />
+                            <label class="form-check-label" for="female">
+                                Žena
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="invalid-feedback d-block gender-error">
+                        Vyberte prosím pohlaví.
+                    </div>
+                </fieldset>
+
+                <div class="mb-4">
+                    <label class="form-label" for="age">Věk</label>
+                    <input class="form-control" id="age" name="age" type="number" min="18" max="99" inputmode="numeric"
+                        required />
+                    <div class="invalid-feedback">
+                        Zadejte věk v rozmezí 18 až 99 let.
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label" for="email">E-mail</label>
+                    <input class="form-control" id="email" name="email" type="email" autocomplete="email" required />
+                    <div class="invalid-feedback">
+                        Zadejte platnou e-mailovou adresu.
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label" for="phone">Telefon (nepovinné)</label>
+                    <input class="form-control" id="phone" name="phone" type="tel" autocomplete="tel"
+                        placeholder="+420 123 456 789" />
+                    <div id="phoneHelp" class="form-text">
+                        Telefon použijeme pouze v případě nutnosti kontaktovat vás ohledně akce.
+                    </div>
+                    <div class="invalid-feedback">
+                        Zadejte platné české telefonní číslo.
+                    </div>
+                </div>
+
+                <!-- Informace o zpracování osobních údajů pro akci -->
+                <p class="small text-muted mb-3">
+                    Odesláním formuláře berete na vědomí, že Vaše osobní údaje zpracováváme za účelem organizace a
+                    realizace akce. Více informací o zpracování osobních údajů a Vašich právech naleznete v našich
+                    <a href="gdpr.html">Zásadách ochrany osobních údajů</a>.
+                </p>
+
+                <!-- Nepovinný checkbox pro e-maily -->
+                <div class="form-check mb-4">
+                    <input class="form-check-input" id="marketing" name="marketing" type="checkbox" />
+                    <label class="form-check-label" for="marketing">
+                        Chci dostávat e-maily s informacemi o dalších chystaných akcích.
+                    </label>
+                </div>
+
+                <!-- Tlačítko -->
+                <button class="btn btn-primary btn-xl text-uppercase w-100" type="submit">
+                    Zkontrolovat údaje
+                </button>
+
+            </form>
+        </section>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/registration_new.js"></script> <!-- "js/registration.js">-->
+    <script src="js/stripe_payment.js"></script>
+</body>
+
+</html>
