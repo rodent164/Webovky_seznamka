@@ -79,13 +79,14 @@
                 return;
             }
 
+
             const { data: checkoutData, error: checkoutError } =
                 await supabaseClient.functions.invoke(
                     "create-checkout-session",
                     {
                         body: {
-                            eventId: data.event_id,
-                            userId: data.user_id,
+                            eventId: data[0].event_id,
+                            userId: data[0].user_id,
                             registrationId: registrationId,
                             email: userData
                         }
@@ -94,6 +95,8 @@
 
             if (checkoutError) {
                 console.error("CHECKOUT ERROR:", checkoutError);
+                const errorBody = await checkoutError.context.text();
+                console.error("ERROR BODY:", errorBody);
                 return;
             }
 
