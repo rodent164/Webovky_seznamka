@@ -24,6 +24,17 @@
     <meta property="og:image" content="https://seznamovaci-akce.cz/assets/img/logo_losos.jpg">
     <meta property="og:url" content="https://seznamovaci-akce.cz">
     <meta property="og:type" content="website">
+
+    <!-- Content-Security-Policy-->
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://js.stripe.com;
+    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net;
+    img-src 'self' data: https:;
+    connect-src 'self' https://*.supabase.co https://api.stripe.com https://api.resend.com;
+    frame-src 'self' https://js.stripe.com https://hooks.stripe.com;
+">
 </head>
 
 <body id="page-top">
