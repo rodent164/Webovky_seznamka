@@ -388,45 +388,24 @@ window.addEventListener('DOMContentLoaded', event => {
             // Main image
             // --------------------------------------------------
 
-            const { data: imageData } =
-                supabaseClient
-                    .storage
-                    .from('event-images')
-                    .getPublicUrl(category.image_main);
-
             const mainImage = document.querySelector(
                 `.portfolio-link[href="#${modal.id}"] img`
             );
 
             if (mainImage) {
-                mainImage.src = imageData.publicUrl;
+                mainImage.src = `assets/img/portfolio/${category.image_main}`;
             }
-
-
-            const imageElement =
-                modal.querySelector('.event-detail-image');
-
-
-            if (imageElement) {
-                imageElement.src = imageData.publicUrl;
-            }
-
 
             // --------------------------------------------------
             // Detail image
             // --------------------------------------------------
 
-            const { data: detailImageData } =
-                supabaseClient
-                    .storage
-                    .from('event-images')
-                    .getPublicUrl(category.image_detail);
-
+            const imageElement =
+                modal.querySelector('.event-detail-image');
 
             if (imageElement) {
-                imageElement.src = detailImageData.publicUrl;
+                imageElement.src = `assets/img/portfolio/${category.image_detail}`;
             }
-
 
             // --------------------------------------------------
             // Practical information
