@@ -1,8 +1,3 @@
-supabaseClient.rpc('test_auth_role').then(({ data, error }) => {
-
-    console.log("ROLE ERROR:", error);
-});
-
 document.addEventListener('DOMContentLoaded', async () => {
     const eventId = new URLSearchParams(window.location.search).get('event_id');
 
