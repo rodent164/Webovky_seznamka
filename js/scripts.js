@@ -1,5 +1,13 @@
 window.addEventListener('DOMContentLoaded', event => {
 
+    const githubEventImagesBaseUrl =
+        'https://raw.githubusercontent.com/rodent164/Webovky_seznamka/Webovky-seznamka/assets/img/portfolio/';
+
+    const getEventImageUrl = (fileName) =>
+        fileName
+            ? `${githubEventImagesBaseUrl}${encodeURIComponent(fileName)}`
+            : '';
+
     const navbarShrink = () => {
         const mainNav = document.querySelector('#mainNav');
 
@@ -231,14 +239,8 @@ window.addEventListener('DOMContentLoaded', event => {
             const imageElement =
                 column.querySelector('.event-main-image');
 
-            const { data: imageData } =
-                supabaseClient
-                    .storage
-                    .from('event-images')
-                    .getPublicUrl(category.image_main);
-
             if (imageElement) {
-                imageElement.src = imageData.publicUrl;
+                imageElement.src = getEventImageUrl(category.image_main);
             }
 
             eventsContainer.appendChild(column);
@@ -388,18 +390,12 @@ window.addEventListener('DOMContentLoaded', event => {
             // Main image
             // --------------------------------------------------
 
-            const { data: imageData } =
-                supabaseClient
-                    .storage
-                    .from('event-images')
-                    .getPublicUrl(category.image_main);
-
             const mainImage = document.querySelector(
                 `.portfolio-link[href="#${modal.id}"] img`
             );
 
             if (mainImage) {
-                mainImage.src = imageData.publicUrl;
+                mainImage.src = getEventImageUrl(category.image_main);
             }
 
 
@@ -416,15 +412,8 @@ window.addEventListener('DOMContentLoaded', event => {
             // Detail image
             // --------------------------------------------------
 
-            const { data: detailImageData } =
-                supabaseClient
-                    .storage
-                    .from('event-images')
-                    .getPublicUrl(category.image_detail);
-
-
             if (imageElement) {
-                imageElement.src = detailImageData.publicUrl;
+                imageElement.src = getEventImageUrl(category.image_detail);
             }
 
 
@@ -643,18 +632,9 @@ window.addEventListener('DOMContentLoaded', event => {
 
 
                         // Detail image
-                        const { data: detailImageData } =
-                            supabaseClient
-                                .storage
-                                .from('event-images')
-                                .getPublicUrl(
-                                    category.image_detail
-                                );
-
-
                         if (imageElement) {
                             imageElement.src =
-                                detailImageData.publicUrl;
+                                getEventImageUrl(category.image_detail);
                         }
 
 
