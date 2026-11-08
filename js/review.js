@@ -17,7 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
             reviewGender: details.gender,
             reviewAge: details.age,
             reviewEmail: details.email,
-            reviewPhone: details.phone
+            reviewPhone: details.phone,
+            reviewAbout: details.about,
+            reviewNote: details.note
         };
 
         Object.entries(fields).forEach(([id, value]) => {
