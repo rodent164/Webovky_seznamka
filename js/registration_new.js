@@ -195,6 +195,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 age: Number(form.elements.age.value),
                 email: form.elements.email.value.trim(),
                 phone: form.elements.phone.value.trim(),
+                about: form.elements.about.value.trim(),
+                note: form.elements.note.value.trim(),
                 allow_email_info: form.elements.marketing.checked,
                 event_id: form.elements.event_id.value
             };
@@ -297,6 +299,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             user_id: existingUser.id,
                             new_nickname: registrationData.nickname,
                             new_age: registrationData.age,
+                            new_about: registrationData.about,
+                            new_note: registrationData.note,
                             new_allow_email_info: registrationData.allow_email_info,
                         }
                     );
@@ -317,9 +321,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                         new_email: registrationData.email,
                         new_phone: registrationData.phone,
                         new_gender: registrationData.gender,
+                        new_about: registrationData.about,
+                        new_note: registrationData.note,
                         new_allow_email_info: registrationData.allow_email_info,
                         new_user_code: generateUserCode()
                     });
+
+                     alert(
+                `Zkontrolujte prosím zadané údaje:\n\n` +
+                `Přezdívka: ${registrationData.nickname}\n` +
+                `Pohlaví: ${registrationData.gender}\n` +
+                `Věk: ${registrationData.age}\n` +
+                `E-mail: ${registrationData.email}\n` +
+                `Telefon: ${registrationData.phone || 'neuvedeno'}\n` +
+                `O mně: ${registrationData.about || 'neuvedeno'}\n` +
+                `Poznámka: ${registrationData.note || 'neuvedeno'}\n` +
+                `Souhlas s e-maily: ${registrationData.allow_email_info ? 'ano' : 'ne'}\n\n` +
+                `Pokud jsou údaje správné, klikněte na OK pro pokračování.`
+            );
 
                 console.log("CREATE USER ERROR:", createUserError);
 
