@@ -398,24 +398,16 @@ window.addEventListener('DOMContentLoaded', event => {
                 mainImage.src = getEventImageUrl(category.image_main);
             }
 
-
-            const imageElement =
-                modal.querySelector('.event-detail-image');
-
-
-            if (imageElement) {
-                imageElement.src = imageData.publicUrl;
-            }
-
-
             // --------------------------------------------------
             // Detail image
             // --------------------------------------------------
 
+            const imageElement =
+                modal.querySelector('.event-detail-image');
+
             if (imageElement) {
                 imageElement.src = getEventImageUrl(category.image_detail);
             }
-
 
             // --------------------------------------------------
             // Practical information
