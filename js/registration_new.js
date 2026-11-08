@@ -327,18 +327,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         new_user_code: generateUserCode()
                     });
 
-                     alert(
-                `Zkontrolujte prosím zadané údaje:\n\n` +
-                `Přezdívka: ${registrationData.nickname}\n` +
-                `Pohlaví: ${registrationData.gender}\n` +
-                `Věk: ${registrationData.age}\n` +
-                `E-mail: ${registrationData.email}\n` +
-                `Telefon: ${registrationData.phone || 'neuvedeno'}\n` +
-                `O mně: ${registrationData.about || 'neuvedeno'}\n` +
-                `Poznámka: ${registrationData.note || 'neuvedeno'}\n` +
-                `Souhlas s e-maily: ${registrationData.allow_email_info ? 'ano' : 'ne'}\n\n` +
-                `Pokud jsou údaje správné, klikněte na OK pro pokračování.`
-            );
 
                 console.log("CREATE USER ERROR:", createUserError);
 
