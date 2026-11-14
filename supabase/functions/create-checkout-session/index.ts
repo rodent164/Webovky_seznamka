@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
         registrationId: registrationId,
         email: email
       },
-      success_url: `${siteUrl}/confirm_payment.html`,
+      success_url: `${siteUrl}/pay_with_QR.html`,
       cancel_url: `${siteUrl}/payment_failed.html?registrationId=${registrationId}`,
 
     });

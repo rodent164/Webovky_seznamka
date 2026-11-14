@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platba přes QR kód</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f6f8;
+            margin: 0;
+            padding: 30px 15px;
+            color: #222;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 25px;
+            margin-bottom: 25px;
+        }
+
+        .steps {
+            text-align: left;
+            line-height: 1.6;
+            padding-left: 25px;
+            margin-bottom: 30px;
+        }
+
+        .steps li {
+            margin-bottom: 12px;
+        }
+
+        .warning {
+            font-weight: bold;
+            color: #d62828;
+        }
+
+        .qr-code {
+            max-width: 100%;
+            width: 300px;
+            height: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Platba přes QR:</h1>
+
+        <ol class="steps">
+            <li>
+                Ujistěte se, že Vám přišel email s potvrzením
+                registrace a platebními údaji.
+            </li>
+            <li>
+                Zaplaťte přes QR kód.
+                <span class="warning">Neměňte zprávu pro příjemce ani variabilní symbol!/span>
+            </li>
+        </ol>
+
+        <img src="assets/img/QR_test.jpg" alt="QR kód pro platbu" class="qr-code"> 
+    </div>
+
+</body>
+</html>
