@@ -1,0 +1,1 @@
+V téhle větvi je původní nastavení pro Stripe platební bránu. Při registraci je uživatel přesměrován na Stripe (musí být přepnutý na sandbox, jinak vyhodí error). Po zaplacení se stav registrace změní na "Paid". Z této větve pokračovat, pokud najdeme jinou platební bránu.
