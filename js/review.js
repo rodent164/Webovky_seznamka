@@ -1,5 +1,6 @@
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('REVIEW.JS SE SPOUSTI');
 
     const savedRegistration = sessionStorage.getItem('registrationDetails');
     let details;
@@ -154,6 +155,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 );
+                console.log('EMAIL DATA:', emailData);
+                console.log('EMAIL ERROR:', emailError);
 
                 if (emailError || !emailData?.success) {
 
@@ -189,7 +192,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
 
                 // Vyčistíme sessionStorage až po úspěšném odeslání.
+                // Uložení QR kódu pro platební stránku
+                sessionStorage.setItem(
+                    'paymentQRCode',
+                    emailData.qrBase64
+                );
 
+                console.log('QR CODE DEBUG:', {
+                    exists: !!emailData.qrBase64,
+                    length: emailData.qrBase64?.length,
+                    saved: !!sessionStorage.getItem('paymentQRCode')
+                });
                 sessionStorage.removeItem('registrationDetails');
                 sessionStorage.removeItem('paymentUserId');
                 sessionStorage.removeItem('pendingRegistrationId');

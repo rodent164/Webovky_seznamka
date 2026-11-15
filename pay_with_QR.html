@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="cs">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,7 +20,7 @@
             padding: 30px;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
             text-align: center;
         }
 
@@ -53,6 +53,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
@@ -65,12 +66,28 @@
             </li>
             <li>
                 Zaplaťte přes QR kód.
-                <span class="warning">Neměňte zprávu pro příjemce ani variabilní symbol!/span>
+                <span class="warning">Neměňte zprávu pro příjemce ani variabilní symbol! </span>
             </li>
         </ol>
 
-        <img src="assets/img/QR_test.jpg" alt="QR kód pro platbu" class="qr-code"> 
+        <img id="paymentQRCode" alt="QR kód pro platbu" class="qr-code">
+
+        <script>
+            const qrCode = sessionStorage.getItem('paymentQRCode');
+
+            if (qrCode) {
+                document.getElementById('paymentQRCode').src =
+                    `data:image/png;base64,${qrCode}`;
+            } else {
+                alert('QR kód se nepodařilo načíst. Zkontrolujte prosím platební e-mail.');
+            }
+        </script>
     </div>
 
+    <a class="btn btn-primary btn-xl text-uppercase mt-4" href="index.html">
+        Zpět na hlavní stránku
+    </a>
+
 </body>
+
 </html>
