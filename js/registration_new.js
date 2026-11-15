@@ -1,13 +1,16 @@
+// SEM PRIDAT VLOZENI USER_CODE DO registrationData!!!
+
+
 document.addEventListener('DOMContentLoaded', async () => {
     const eventId = new URLSearchParams(window.location.search).get('event_id');
 
     const futureInterest = new URLSearchParams(window.location.search).get('future');
 
     const isFutureInterest = futureInterest === 'true';
-    
+
     if (!eventId && !isFutureInterest) {
-    return;
-}
+        return;
+    }
 
     const eventDetailsInfo = document.querySelector('.event-details-info');
 
@@ -193,12 +196,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 nickname: form.elements.nickname.value.trim(),
                 gender: selectedGender.value,
                 age: Number(form.elements.age.value),
-                email: form.elements.email.value.trim(),
+                email: form.elements.email.value.trim().toLowerCase(),
                 phone: form.elements.phone.value.trim(),
                 about: form.elements.about.value.trim(),
                 note: form.elements.note.value.trim(),
                 allow_email_info: form.elements.marketing.checked,
-                event_id: form.elements.event_id.value
+                event_id: form.elements.event_id.value,
+                user_code: generateUserCode()
             };
 
 
@@ -262,7 +266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { data: existingUser, error: findUserError } =
                 await supabaseClient
                     .rpc('find_user_by_email', {
-                        user_email: registrationData.email
+                        user_email: registrationData.email,
                     })
                     .maybeSingle();
 
@@ -306,7 +310,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     );
 
                 user = {
-                    id: existingUser.id
+                    id: existingUser.id,
+                    user_code: existingUser.user_code
                 };
 
                 userError = error;
@@ -324,110 +329,148 @@ document.addEventListener('DOMContentLoaded', async () => {
                         new_about: registrationData.about,
                         new_note: registrationData.note,
                         new_allow_email_info: registrationData.allow_email_info,
-                        new_user_code: generateUserCode()
+                        new_user_code: registrationData.user_code
                     });
 
 
                 console.log("CREATE USER ERROR:", createUserError);
 
                 if (createUserError || !newUserId) {
-                    console.error("CREATE USER FAILED:", createUserError);
-                    throw new Error("Nepodařilo se vytvořit uživatele.");
+                    console.log
+                    console.error("CREATE USER FAILED:", {
+                        error: createUserError,
+                        new_nickname: registrationData.nickname,
+                        new_age: registrationData.age,
+                        new_email: registrationData.email,
+                        new_phone: registrationData.phone,
+                        new_gender: registrationData.gender,
+                        new_about: registrationData.about,
+                        new_note: registrationData.note,
+                        new_allow_email_info: registrationData.allow_email_info,
+                        new_user_code: registrationData.user_code
+                    });
+
+                    user = {
+                        id: newUserId,
+                        user_code: registrationData.user_code
+                    };
+
+                    userError = null;
+                }
                 }
 
-                user = {
-                    id: newUserId
-                };
-
-                userError = null;
-            }
-
-            console.log("USER ERROR:", userError);
+                console.log("USER ERROR:", userError);
 
 
-            if (userError) {
+                if (userError) {
 
-                console.error("USER ERROR OBJECT:", userError);
-
-                alert(
-                    "Chyba při ukládání uživatele: " +
-                    JSON.stringify(userError)
-                );
-
-                return;
-            }
-
-            console.log("userError:", userError);
-
-
-            // ============================================================
-            // 4) BUDOUCÍ ZÁJEM
-            // ============================================================
-
-            if (isFutureInterest) {
-
-                const { data: existingInterest, error: interestCheckError } =
-                    await supabaseClient.rpc(
-                        'check_future_interest',
-                        {
-                            p_user_id: user.id,
-                            p_category_id: Number(categoryId)
-                        }
-                    );
-
-
-                if (interestCheckError) {
-
-                    console.error(
-                        "FUTURE INTEREST CHECK ERROR:",
-                        interestCheckError
-                    );
+                    console.error("USER ERROR OBJECT:", userError);
 
                     alert(
-                        "Nepodařilo se ověřit váš předchozí zájem o tuto akci."
+                        "Chyba při ukládání uživatele: " +
+                        JSON.stringify(userError)
                     );
 
                     return;
                 }
 
+                console.log("userError:", userError);
+                // Zde sjednotíme user_code pro nové i existující uživatele
+                registrationData.user_code = user.user_code;
 
-                if (existingInterest) {
 
-                    alert(
-                        "O tuto akci jste již projevil/a zájem."
+                // ============================================================
+                // 4) BUDOUCÍ ZÁJEM
+                // ============================================================
+
+                if (isFutureInterest) {
+
+                    const { data: existingInterest, error: interestCheckError } =
+                        await supabaseClient.rpc(
+                            'check_future_interest',
+                            {
+                                p_user_id: user.id,
+                                p_category_id: Number(categoryId)
+                            }
+                        );
+
+
+                    if (interestCheckError) {
+
+                        console.error(
+                            "FUTURE INTEREST CHECK ERROR:",
+                            interestCheckError
+                        );
+
+                        alert(
+                            "Nepodařilo se ověřit váš předchozí zájem o tuto akci."
+                        );
+
+                        return;
+                    }
+
+
+                    if (existingInterest) {
+
+                        alert(
+                            "O tuto akci jste již projevil/a zájem."
+                        );
+
+                        return;
+                    }
+
+
+                    const { error: futureInterestError } =
+                        await supabaseClient
+                            .from('future_event_interests')
+                            .insert({
+                                user_id: user.id,
+                                category_id: Number(categoryId),
+                                status: 'interested'
+                            });
+
+
+                    if (futureInterestError) {
+
+                        console.error(
+                            "FUTURE INTEREST ERROR:",
+                            futureInterestError
+                        );
+
+                        alert(
+                            "Nepodařilo se uložit váš zájem o budoucí akci: " +
+                            futureInterestError.message
+                        );
+
+                        return;
+                    }
+
+
+                    // Uložíme údaje pro review stránku
+                    sessionStorage.setItem(
+                        'registrationDetails',
+                        JSON.stringify(registrationData)
                     );
+
+                    sessionStorage.setItem(
+                        'paymentUserId',
+                        user.id
+                    );
+
+                    sessionStorage.setItem(
+                        'futureInterest',
+                        'true'
+                    );
+                    window.location.href = 'future-review.html';
 
                     return;
                 }
 
 
-                const { error: futureInterestError } =
-                    await supabaseClient
-                        .from('future_event_interests')
-                        .insert({
-                            user_id: user.id,
-                            category_id: Number(categoryId),
-                            status: 'interested'
-                        });
+                // ============================================================
+                // 5) NORMÁLNÍ REGISTRACE
+                // ============================================================
 
-
-                if (futureInterestError) {
-
-                    console.error(
-                        "FUTURE INTEREST ERROR:",
-                        futureInterestError
-                    );
-
-                    alert(
-                        "Nepodařilo se uložit váš zájem o budoucí akci: " +
-                        futureInterestError.message
-                    );
-
-                    return;
-                }
-
-
-                // Uložíme údaje pro review stránku
                 sessionStorage.setItem(
                     'registrationDetails',
                     JSON.stringify(registrationData)
@@ -438,41 +481,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     user.id
                 );
 
-                sessionStorage.setItem(
-                    'futureInterest',
-                    'true'
-                );
-                window.location.href = 'future-review.html';
+                sessionStorage.removeItem('futureInterest');
 
-                return;
+                window.location.href = 'review.html';
+
+
+            } finally {
+
+                form.dataset.submitting = 'false';
             }
 
-
-            // ============================================================
-            // 5) NORMÁLNÍ REGISTRACE
-            // ============================================================
-
-            sessionStorage.setItem(
-                'registrationDetails',
-                JSON.stringify(registrationData)
-            );
-
-            sessionStorage.setItem(
-                'paymentUserId',
-                user.id
-            );
-
-            sessionStorage.removeItem('futureInterest');
-
-            window.location.href = 'review.html';
-
-
-        } finally {
-
-            form.dataset.submitting = 'false';
-        }
-
-    });
+        });
 
 
 });

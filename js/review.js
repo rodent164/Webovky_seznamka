@@ -1,9 +1,13 @@
 
-const paymentUserId = sessionStorage.getItem('paymentUserId');
-
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('REVIEW.JS SE SPOUSTI');
+
     const savedRegistration = sessionStorage.getItem('registrationDetails');
     let details;
+
+    // ==========================================
+    // 1. KONTROLA REGISTRAČNÍCH ÚDAJŮ
+    // ==========================================
 
     if (!savedRegistration) {
         window.location.replace('rezervace.html');
@@ -12,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
         details = JSON.parse(savedRegistration);
+
+
         const fields = {
             reviewNickname: details.nickname,
             reviewGender: details.gender,
@@ -19,104 +25,220 @@ document.addEventListener('DOMContentLoaded', () => {
             reviewEmail: details.email,
             reviewPhone: details.phone,
             reviewAbout: details.about,
-            reviewNote: details.note
+            reviewNote: details.note,
+            reviewUserCode: details.user_code
         };
 
         Object.entries(fields).forEach(([id, value]) => {
-            document.querySelector(`#${id}`).textContent = value || '—';
+            const element = document.querySelector(`#${id}`);
+
+            if (element) {
+                element.textContent = value || '—';
+            }
         });
+
     } catch (error) {
+        console.error('REGISTRATION DATA ERROR:', error);
+
         sessionStorage.removeItem('registrationDetails');
         window.location.replace('rezervace.html');
         return;
     }
 
-    document.querySelector('#confirmRegistration').addEventListener('click', async (event) => {
-        //alert("KLIK NA ZAPLATIT");
-        const button = event.currentTarget;
 
-        button.disabled = true;
-        button.textContent = 'Přesměrování na platbu…';
+    // ==========================================
+    // 2. POTVRZENÍ REGISTRACE
+    // ==========================================
 
-        try {
-            const paymentUserId = sessionStorage.getItem('paymentUserId');
-            const details = JSON.parse(
-                sessionStorage.getItem('registrationDetails')
-            );
+    document.querySelector('#confirmRegistration').addEventListener(
+        'click',
+        async (event) => {
 
-            let registration;
-            let registrationError;
-            
-            const { data: newRegistrationId, error: createRegistrationError } =
-                await supabaseClient.rpc(
-                    'create_registration',
-                    {
-                        p_user_id: paymentUserId,
-                        p_event_id: details.event_id
-                    }
+            const button = event.currentTarget;
+
+            button.disabled = true;
+            button.textContent = 'Dokončení registrace…';
+
+            try {
+
+                const paymentUserId =
+                    sessionStorage.getItem('paymentUserId');
+
+                const details = JSON.parse(
+                    sessionStorage.getItem('registrationDetails')
                 );
 
-            registration = newRegistrationId
-                ? {
-                    id: newRegistrationId,
-                    status: 'reserved'
+                if (!paymentUserId) {
+                    throw new Error('Chybí ID uživatele.');
                 }
-                : null;
 
-            registrationError = createRegistrationError;
+                // ==========================================
+                // 4. NAČTENÍ USERCODE Z REGISTRAČNÍCH ÚDAJŮ
+                // ==========================================
 
+                const userCode = details.user_code;
 
-            if (registrationError) {
-                console.error("REGISTRATION ERROR:", registrationError);
-                throw new Error("Nepodařilo se vytvořit rezervaci.");
-            }
-
-            if (registrationError) {
-                console.error("REGISTRATION ERROR:", registrationError);
-                throw new Error("Nepodařilo se vytvořit rezervaci.");
-            }
+                if (!userCode) {
+                    throw new Error('Chybí uživatelský kód.');
+                }
 
 
-            const { data, error } =
-                await supabaseClient.functions.invoke(
-                    'create-checkout-session',
+                // ==========================================
+                // 5. VYTVOŘENÍ REGISTRACE
+                // ==========================================
+
+                // Pokud registrace již vznikla, použijeme její ID.
+                // Zabráníme tak vytvoření duplicitní registrace
+                // při opakovaném pokusu o odeslání e-mailu.
+
+                let registrationId = sessionStorage.getItem(
+                    'pendingRegistrationId'
+                );
+
+                if (!registrationId) {
+
+                    button.textContent = 'Vytváření registrace…';
+
+                    const {
+                        data: newRegistrationId,
+                        error: createRegistrationError
+                    } = await supabaseClient.rpc(
+                        'create_registration',
+                        {
+                            p_user_id: paymentUserId,
+                            p_event_id: details.event_id
+                        }
+                    );
+
+                    if (
+                        createRegistrationError ||
+                        !newRegistrationId
+                    ) {
+                        console.error(
+                            'REGISTRATION ERROR:',
+                            createRegistrationError
+                        );
+
+                        throw new Error(
+                            'Nepodařilo se vytvořit novou rezervaci.'
+                        );
+                    }
+
+                    registrationId = newRegistrationId;
+
+                    // Uložíme ID pro případ opakovaného pokusu.
+                    sessionStorage.setItem(
+                        'pendingRegistrationId',
+                        registrationId
+                    );
+                }
+
+
+                // ==========================================
+                // 6. ODESLÁNÍ POTVRZOVACÍHO EMAILU
+                // ==========================================
+
+                button.textContent = 'Odesílání potvrzovacího e-mailu…';
+
+                const {
+                    data: emailData,
+                    error: emailError
+                } = await supabaseClient.functions.invoke(
+                    'send-registration-payment-email',
                     {
                         body: {
-                            eventId: details.event_id,
+                            registrationId: registrationId,
                             userId: paymentUserId,
-                            registrationId: registration.id,
-                            email: details.email
+                            eventId: details.event_id,
+                            email: details.email,
+                            userCode: userCode
                         }
                     }
                 );
+                console.log('EMAIL DATA:', emailData);
+                console.log('EMAIL ERROR:', emailError);
 
-            if (error || !data?.url) {
-                console.error("STRIPE ERROR:", error);
-                console.error("STRIPE DATA:", data);
+                if (emailError || !emailData?.success) {
 
-                throw new Error(
-                    error?.message || 'Nepodařilo se vytvořit platbu.'
+                    console.error(
+                        'EMAIL ERROR:',
+                        emailError || emailData
+                    );
+
+                    throw new Error(
+                        emailData?.error ||
+                        'Nepodařilo se odeslat potvrzovací e-mail.'
+                    );
+                }
+
+
+                // ==========================================
+                // 7. ÚSPĚŠNÉ DOKONČENÍ
+                // ==========================================
+
+                console.log(
+                    'REGISTRATION SUCCESS:',
+                    registrationId
+                );
+
+                console.log(
+                    'EMAIL SENT:',
+                    emailData.emailId
+                );
+
+                console.log(
+                    'VARIABLE SYMBOL:',
+                    emailData.variableSymbol
+                );
+
+                // Vyčistíme sessionStorage až po úspěšném odeslání.
+                // Uložení QR kódu pro platební stránku
+                sessionStorage.setItem(
+                    'paymentQRCode',
+                    emailData.qrBase64
+                );
+
+                console.log('QR CODE DEBUG:', {
+                    exists: !!emailData.qrBase64,
+                    length: emailData.qrBase64?.length,
+                    saved: !!sessionStorage.getItem('paymentQRCode')
+                });
+                sessionStorage.removeItem('registrationDetails');
+                sessionStorage.removeItem('paymentUserId');
+                sessionStorage.removeItem('pendingRegistrationId');
+
+                // Přesměrování na QR stránku.
+                window.location.assign('pay_with_QR.html');
+
+
+            } catch (error) {
+
+                console.error('REGISTRATION ERROR:', error);
+
+                button.disabled = false;
+                button.textContent = 'Zkusit znovu';
+
+                alert(
+                    error.message ||
+                    'Registraci se nepodařilo dokončit. Zkuste to prosím znovu.'
                 );
             }
-
-            window.location.assign(data.url);
-
-        } catch (error) {
-            console.error("PAYMENT ERROR:", error);
-
-            button.disabled = false;
-            button.textContent = 'Zaplatit a potvrdit registraci';
-
-            alert('Platbu se nepodařilo zahájit. Zkuste to prosím znovu.');
         }
-    });
+    );
 });
 
+
+// ==========================================
+// 8. OBNOVENÍ TLAČÍTKA PO NÁVRATU NA STRÁNKU
+// ==========================================
+
 window.addEventListener('pageshow', () => {
+
     const button = document.querySelector('#confirmRegistration');
 
     if (button) {
         button.disabled = false;
-        button.textContent = 'Zaplatit a potvrdit registraci';
+        button.textContent = 'Potvrdit registraci';
     }
+
 });
