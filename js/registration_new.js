@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const { data, error } = await supabaseClient
             .from('events')
             .select(`
+            name,
             age_min,
             age_max,
             capacity_m,
@@ -42,6 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             location,
             category_id,
             price,
+            about_event,
             event_categories (
             name
         )
@@ -53,6 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("EVENT ERROR:", error);
             return;
         }
+        // debug
+        console.log("EVENT DATA:", data);
 
         eventData = data;
 
@@ -71,6 +75,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const eventTimeElement = document.querySelector('.eventTime');
         const eventLocationElement = document.querySelector('.eventLocation');
         const eventPriceElement = document.querySelector('.eventPrice');
+        const eventAboutElement = document.querySelector('.eventAbout');
+        const eventNameElement = document.querySelector('.registration-event-name');
+
+        if (eventNameElement) {
+            eventNameElement.textContent = eventData.name;
+        }
 
         if (eventDateElement) {
             const [year, month, day] = eventData.event_date.split('-');
@@ -93,6 +103,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 eventData.price;
         }
 
+        if (eventAboutElement) {
+            eventAboutElement.textContent =
+                eventData.about_event;
+        }   
+
     }
 
     const categoryId = isFutureInterest
@@ -113,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const eventNameElement = document.querySelector('.registration-event-name');
         if (eventNameElement) {
-            eventNameElement.textContent = categoryData.name;
+            eventNameElement.textContent = eventData.name;
         }
     }
 
