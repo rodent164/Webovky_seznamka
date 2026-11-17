@@ -65,6 +65,7 @@ window.addEventListener('DOMContentLoaded', event => {
                 .from('events')
                 .select(`
                     id,
+                    name,
                     event_date,
                     event_time,
                     age_min,
@@ -75,7 +76,6 @@ window.addEventListener('DOMContentLoaded', event => {
                     price,
                     event_categories (
                         id,
-                        name,
                         image_main
                     )
                 `)
@@ -131,7 +131,7 @@ window.addEventListener('DOMContentLoaded', event => {
                     &nbsp;&nbsp;
                     <strong>${event.age_min}–${event.age_max} let</strong>
                     &nbsp;&nbsp;
-                    ${category.name}
+                    ${event.name}
                     &nbsp;&nbsp;
                     <span>
                     ${capacity_m_f > 0
