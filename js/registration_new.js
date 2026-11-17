@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             location,
             category_id,
             price,
+            about_event,
             event_categories (
             name
         )
@@ -71,6 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const eventTimeElement = document.querySelector('.eventTime');
         const eventLocationElement = document.querySelector('.eventLocation');
         const eventPriceElement = document.querySelector('.eventPrice');
+        const eventAboutElement = document.querySelector('.eventAbout');
 
         if (eventDateElement) {
             const [year, month, day] = eventData.event_date.split('-');
@@ -92,6 +94,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             eventPriceElement.textContent =
                 eventData.price;
         }
+
+        if (eventAboutElement) {
+            eventAboutElement.textContent =
+                eventData.about_event;
+        }   
 
     }
 
