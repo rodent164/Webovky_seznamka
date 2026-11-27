@@ -80,9 +80,11 @@ window.addEventListener('DOMContentLoaded', event => {
                     )
                 `)
                 .gte('event_date', new Date().toISOString().split('T')[0])
+                .not('name', 'ilike', 'test%') 
                 .order('event_date', { ascending: true })
                 .order('event_time', { ascending: true })
                 .limit(5);
+
 
         if (error) {
             console.error(
@@ -179,8 +181,8 @@ window.addEventListener('DOMContentLoaded', event => {
                 age_min,
                 age_max,
                 price
-            )
-        `);
+            ) 
+        `).not('events.name', 'ilike', 'test%'); // Comment out this line to include test events
 
         if (categoriesError) {
             console.error("CHYBA PŘI NAČÍTÁNÍ KATEGORIÍ:", categoriesError);
